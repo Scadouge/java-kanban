@@ -1,9 +1,7 @@
 package tasks;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 public class Task {
+    public final TaskType TASK_TYPE = TaskType.TASK;
     private final long id;
     private String name;
     private String description;
@@ -39,16 +37,12 @@ public class Task {
         this.description = description;
     }
 
-    void setStatus(Status status) {
-        this.status = status;
-    }
-
     public Status getStatus() {
         return status;
     }
 
-    Collection<Task> onRemove() {
-        return new ArrayList<>();
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     @Override

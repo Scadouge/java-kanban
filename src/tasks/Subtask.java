@@ -1,10 +1,8 @@
 package tasks;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 public class Subtask extends Task {
-    private Epic epic;
+    public final TaskType TASK_TYPE = TaskType.SUBTASK;
+    private long epicId;
 
     public Subtask(long id) {
         super(id);
@@ -14,22 +12,12 @@ public class Subtask extends Task {
         super(id, status);
     }
 
-    public void connectToEpic(Epic epic) {
-        this.epic = epic;
+    public long getEpicId() {
+        return epicId;
     }
 
-    private Epic getEpic() {
-        return epic;
-    }
-
-    long getEpicId() {
-        return epic.getId();
-    }
-
-    @Override
-    Collection<Task> onRemove() {
-        getEpic().removeSubtask(this);
-        return new ArrayList<>();
+    public void setEpicId(long epicId) {
+        this.epicId = epicId;
     }
 
     @Override
@@ -38,7 +26,7 @@ public class Subtask extends Task {
                 "id=" + getId() +
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", epic.getId()=" + epic.getId() +
+                ", epicId=" + getEpicId() +
                 ", status=" + getStatus() +
                 '}';
     }

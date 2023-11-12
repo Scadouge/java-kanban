@@ -1,60 +1,31 @@
 package tasks;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
 public class Epic extends Task {
-    private HashMap<Long, Subtask> subtasks;
+    public final TaskType TASK_TYPE = TaskType.EPIC;
+    private Collection<Long> subtaskIds;
 
     public Epic(long id) {
         super(id);
-        subtasks = new HashMap<>();
+        subtaskIds = new HashSet<>();
     }
 
-    private void updateStatus() {
-        Status newStatus = null;
-        for(Subtask subtask : subtasks.values()) {
-            if(newStatus != null) {
-                if (subtask.getStatus() != newStatus) {
-                    newStatus = Status.IN_PROGRESS;
-                    break;
-                }
-            } else
-                newStatus = subtask.getStatus();
-        }
-        if(newStatus == null || subtasks.size() == 0)
-            newStatus = Status.NEW;
-        setStatus(newStatus);
+    public Collection<Long> getSubtaskIds() {
+        return subtaskIds;
     }
 
-    public void addSubtask(Subtask subtask) {
-        subtask.connectToEpic(this);
-        subtasks.put(subtask.getId(), subtask);
-        updateStatus();
+    public void addSubtaskId(long id) {
+        subtaskIds.add(id);
     }
 
-    void removeSubtask(Subtask subtask) {
-        subtasks.remove(subtask.getId());
-        updateStatus();
+    public void removeSubtaskId(long id) {
+        subtaskIds.remove(id);
     }
 
-    void setSubtasksMap(HashMap<Long, Subtask> newMap) {
-        subtasks = newMap;
-        updateStatus();
-    }
-
-    HashMap<Long, Subtask> getSubtasksMap() {
-      return subtasks;
-    }
-
-    public Collection<Subtask> getSubtasks() {
-        return subtasks.values();
-    }
-
-    @Override
-    Collection<Task> onRemove() {
-        return getSubtasks().stream().map(c -> (Task) c).collect(Collectors.toList());
+    public void setSubtaskIds(Collection<Long> newIds) {
+        subtaskIds = newIds;
     }
 
     @Override
@@ -63,7 +34,7 @@ public class Epic extends Task {
                 "id=" + getId() + '\'' +
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", subtasks.size()=" + subtasks.size() +
+                ", subtaskIds.size()=" + getSubtaskIds().size() +
                 ", status=" + getStatus() +
                 '}';
     }
