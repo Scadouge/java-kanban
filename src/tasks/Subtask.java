@@ -2,22 +2,15 @@ package tasks;
 
 public class Subtask extends Task {
     public final TaskType TASK_TYPE = TaskType.SUBTASK;
-    private long epicId;
+    private final long epicId;
 
-    public Subtask(long id) {
-        super(id);
-    }
-
-    public Subtask(long id, Status status) {
-        super(id, status);
+    public Subtask(long epicId) {
+        super();
+        this.epicId = epicId;
     }
 
     public long getEpicId() {
         return epicId;
-    }
-
-    public void setEpicId(long epicId) {
-        this.epicId = epicId;
     }
 
     @Override

@@ -5,10 +5,10 @@ import java.util.HashSet;
 
 public class Epic extends Task {
     public final TaskType TASK_TYPE = TaskType.EPIC;
-    private Collection<Long> subtaskIds;
+    private final Collection<Long> subtaskIds;
 
-    public Epic(long id) {
-        super(id);
+    public Epic() {
+        super();
         subtaskIds = new HashSet<>();
     }
 
@@ -24,8 +24,8 @@ public class Epic extends Task {
         subtaskIds.remove(id);
     }
 
-    public void setSubtaskIds(Collection<Long> newIds) {
-        subtaskIds = newIds;
+    public void clearSubtaskIds() {
+        subtaskIds.clear();
     }
 
     @Override

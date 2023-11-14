@@ -35,11 +35,15 @@ public class TaskManager {
     }
 
     public void createTask(Task task) {
+        task.setId(generateId());
         tasks.put(task.getId(), task);
     }
 
     public void updateTask(Task task) {
-        tasks.put(task.getId(), task);
+        if (tasks.containsKey(task.getId()))
+            tasks.put(task.getId(), task);
+        else
+            System.out.println("Обновляемая задача не найдена " + task);
     }
 
     public void removeTask(long id) {
@@ -52,32 +56,36 @@ public class TaskManager {
     }
 
     public void clearSubtasks() {
-        Set<Long> keySet = new HashSet<>(subtasks.keySet());
-        keySet.forEach(this::removeSubtask);
+        subtasks.clear();
+        epics.values().forEach(epic -> {
+            epic.clearSubtaskIds();
+            epic.setStatus(Status.NEW);
+        });
     }
 
     public Subtask getSubtask(long id) {
         return subtasks.get(id);
     }
 
-    public void createSubtask(Subtask subtask, long epicId) {
-        createSubtask(subtask, getEpic(epicId));
-    }
-
-    public void createSubtask(Subtask subtask, Epic epic) {
-        subtask.setEpicId(epic.getId());
-        epic.addSubtaskId(subtask.getId());
-        subtasks.put(subtask.getId(), subtask);
-        updateStatus(epic);
+    public void createSubtask(Subtask subtask) {
+        if(epics.containsKey(subtask.getEpicId())) {
+            subtask.setId(generateId());
+            Epic epic = getEpic(subtask.getEpicId());
+            epic.addSubtaskId(subtask.getId());
+            subtasks.put(subtask.getId(), subtask);
+            updateStatus(epic);
+        } else
+            System.out.println("Не найден епик, при создании подзадачи " + subtask);
     }
 
     public void updateSubtask(Subtask subtask) {
-        Subtask existingSubtask = getSubtask(subtask.getId());
-        Epic epic = getEpic(existingSubtask.getEpicId());
-
-        subtask.setEpicId(epic.getId());
-        subtasks.put(subtask.getId(), subtask);
-        updateStatus(epic);
+        if (subtasks.containsKey(subtask.getId())) {
+            Subtask existingSubtask = getSubtask(subtask.getId());
+            Epic epic = getEpic(existingSubtask.getEpicId());
+            subtasks.put(subtask.getId(), subtask);
+            updateStatus(epic);
+        } else
+            System.out.println("Обновляемая подзадача не найдена " + subtask);
     }
 
     public void removeSubtask(long id) {
@@ -93,8 +101,8 @@ public class TaskManager {
     }
 
     public void clearEpics() {
-        Set<Long> keySet = new HashSet<>(epics.keySet());
-        keySet.forEach(this::removeEpic);
+        epics.clear();
+        subtasks.clear();
     }
 
     public Epic getEpic(long id) {
@@ -102,20 +110,23 @@ public class TaskManager {
     }
 
     public void createEpic(Epic epic) {
+        epic.setId(generateId());
         epics.put(epic.getId(), epic);
     }
 
     public void updateEpic(Epic epic) {
-        Epic existingEpic = getEpic(epic.getId());
-        epic.setSubtaskIds(existingEpic.getSubtaskIds());
-        updateStatus(epic);
-        epics.put(epic.getId(), epic);
+        if (epics.containsKey(epic.getId())) {
+            Epic existingEpic = getEpic(epic.getId());
+            existingEpic.getSubtaskIds().forEach(epic::addSubtaskId);
+            epic.setStatus(existingEpic.getStatus());
+            epics.put(epic.getId(), epic);
+        } else
+            System.out.println("Обновляемый эпик не найден " + epic);
     }
 
     public void removeEpic(long id) {
         Epic epic = getEpic(id);
-        HashSet<Long> keySet = new HashSet<>(epic.getSubtaskIds());
-        keySet.forEach(this::removeSubtask);
+        epic.getSubtaskIds().forEach(subtasks::remove);
         epics.remove(id);
     }
 
@@ -125,8 +136,8 @@ public class TaskManager {
 
     private void updateStatus(Epic epic) {
         Status newStatus = null;
-        for(Subtask subtask : getSubtasks(epic)) {
-            if(newStatus != null) {
+        for (Subtask subtask : getSubtasks(epic)) {
+            if (newStatus != null) {
                 if (subtask.getStatus() != newStatus) {
                     newStatus = Status.IN_PROGRESS;
                     break;
@@ -134,12 +145,12 @@ public class TaskManager {
             } else
                 newStatus = subtask.getStatus();
         }
-        if(newStatus == null || subtasks.size() == 0)
+        if (newStatus == null || subtasks.isEmpty())
             newStatus = Status.NEW;
         epic.setStatus(newStatus);
     }
 
-    public long generateId() {
+    private long generateId() {
         return sequenceId++;
     }
 }
