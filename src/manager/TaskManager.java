@@ -115,12 +115,9 @@ public class TaskManager {
     }
 
     public void updateEpic(Epic epic) {
-        if (epics.containsKey(epic.getId())) {
-            Epic existingEpic = getEpic(epic.getId());
-            existingEpic.getSubtaskIds().forEach(epic::addSubtaskId);
-            epic.setStatus(existingEpic.getStatus());
+        if (epics.containsKey(epic.getId()))
             epics.put(epic.getId(), epic);
-        } else
+        else
             System.out.println("Обновляемый эпик не найден " + epic);
     }
 
