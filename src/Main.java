@@ -1,10 +1,16 @@
+import manager.Managers;
 import manager.TaskManager;
-import tasks.*;
+import tasks.Epic;
+import tasks.Status;
+import tasks.Subtask;
+import tasks.Task;
+
+import java.util.Random;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
 
         Task task1 = new Task();
         taskManager.createTask(task1);
@@ -15,36 +21,26 @@ public class Main {
         Subtask subtask1 = new Subtask(epic1.getId());
         subtask1.setStatus(Status.IN_PROGRESS);
         taskManager.createSubtask(subtask1);
+
         Subtask subtask2 = new Subtask(epic1.getId());
         subtask2.setStatus(Status.DONE);
         taskManager.createSubtask(subtask2);
 
-        printAllTasks(taskManager);
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            if(random.nextBoolean())
+                taskManager.getEpic(epic1.getId());
+            else
+                taskManager.getTask(task1.getId());
+            Managers.getDefaultHistory().getHistory().forEach(System.out::println);
+            System.out.println("---------------------------------");
+        }
 
-        Epic updateEpic1 = new Epic();
-        updateEpic1.setId(epic1.getId());
-        updateEpic1.setName("Epic 1 new name");
-        taskManager.updateEpic(updateEpic1);
-
-        printAllTasks(taskManager);
-
-        Subtask updateSubtask1 = new Subtask(epic1.getId());
-        updateSubtask1.setId(subtask1.getId());
-        updateSubtask1.setName("Subtask 1 new name");
-        updateSubtask1.setStatus(Status.DONE);
-        taskManager.updateSubtask(updateSubtask1);
-
-        printAllTasks(taskManager);
-
-        taskManager.clearEpics();
-
-        printAllTasks(taskManager);
     }
 
     private static void printAllTasks(TaskManager taskManager) {
         taskManager.getTasks().forEach(System.out::println);
         taskManager.getEpics().forEach(System.out::println);
         taskManager.getSubtasks().forEach(System.out::println);
-        System.out.println("================================================");
     }
 }
