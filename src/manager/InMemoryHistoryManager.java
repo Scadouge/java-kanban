@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
+    private static final int MAX_HISTORY_ITEMS = 10;
     private final LinkedList<Task> taskHistory;
 
     public InMemoryHistoryManager() {
@@ -14,9 +15,12 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        taskHistory.add(task);
-        if(taskHistory.size() > 10)
-            taskHistory.pollFirst();
+        if(task != null) {
+            if (taskHistory.size() >= MAX_HISTORY_ITEMS) {
+                taskHistory.pollFirst();
+            }
+            taskHistory.add(task);
+        }
     }
 
     @Override
