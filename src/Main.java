@@ -10,6 +10,10 @@ import java.util.Random;
 public class Main {
 
     public static void main(String[] args) {
+        test();
+    }
+
+    private static void test() {
         TaskManager taskManager = Managers.getDefault();
 
         Task task1 = new Task();
@@ -32,10 +36,9 @@ public class Main {
                 taskManager.getEpic(epic1.getId());
             else
                 taskManager.getTask(task1.getId());
-            Managers.getDefaultHistory().getHistory().forEach(System.out::println);
+            taskManager.getHistory().forEach(System.out::println);
             System.out.println("---------------------------------");
         }
-
     }
 
     private static void printAllTasks(TaskManager taskManager) {

@@ -56,10 +56,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
-        if (tasks.containsKey(task.getId()))
+        if (tasks.containsKey(task.getId())) {
             tasks.put(task.getId(), task);
-        else
+        } else {
             System.out.println("Обновляемая задача не найдена " + task);
+        }
     }
 
     @Override
@@ -97,8 +98,9 @@ public class InMemoryTaskManager implements TaskManager {
             epic.addSubtaskId(subtask.getId());
             subtasks.put(subtask.getId(), subtask);
             updateStatus(epic);
-        } else
+        } else {
             System.out.println("Не найден епик, при создании подзадачи " + subtask);
+        }
     }
 
     @Override
@@ -108,8 +110,9 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epics.get(existingSubtask.getEpicId());
             subtasks.put(subtask.getId(), subtask);
             updateStatus(epic);
-        } else
+        } else {
             System.out.println("Обновляемая подзадача не найдена " + subtask);
+        }
     }
 
     @Override
@@ -147,10 +150,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateEpic(Epic epic) {
-        if (epics.containsKey(epic.getId()))
+        if (epics.containsKey(epic.getId())) {
             epics.put(epic.getId(), epic);
-        else
+        } else {
             System.out.println("Обновляемый эпик не найден " + epic);
+        }
     }
 
     @Override
@@ -173,11 +177,13 @@ public class InMemoryTaskManager implements TaskManager {
                     newStatus = Status.IN_PROGRESS;
                     break;
                 }
-            } else
+            } else {
                 newStatus = subtask.getStatus();
+            }
         }
-        if (newStatus == null || subtasks.isEmpty())
+        if (newStatus == null || subtasks.isEmpty()) {
             newStatus = Status.NEW;
+        }
         epic.setStatus(newStatus);
     }
 
