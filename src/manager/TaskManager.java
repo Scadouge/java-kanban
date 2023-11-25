@@ -5,8 +5,11 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface TaskManager {
+
+    List<Task> getHistory();
 
     // Task
     Collection<Task> getTasks();

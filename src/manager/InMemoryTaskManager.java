@@ -7,12 +7,14 @@ import tasks.Task;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Long, Task> tasks;
     protected final HashMap<Long, Subtask> subtasks;
     protected final HashMap<Long, Epic> epics;
+    private final HistoryManager historyManager;
     private long sequenceId;
 
     public InMemoryTaskManager() {
@@ -20,6 +22,12 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks = new HashMap<>();
         epics = new HashMap<>();
         sequenceId = 0;
+        historyManager = Managers.getDefaultHistory();
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     // Task
@@ -36,7 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(long id) {
         Task task = tasks.get(id);
-        Managers.getDefaultHistory().add(task);
+        historyManager.add(task);
         return task;
     }
 
@@ -77,7 +85,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtask(long id) {
         Subtask subtask = subtasks.get(id);
-        Managers.getDefaultHistory().add(subtask);
+        historyManager.add(subtask);
         return subtask;
     }
 
@@ -127,7 +135,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpic(long id) {
         Epic epic = epics.get(id);
-        Managers.getDefaultHistory().add(epic);
+        historyManager.add(epic);
         return epic;
     }
 
