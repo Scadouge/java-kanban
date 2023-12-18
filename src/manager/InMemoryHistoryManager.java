@@ -2,29 +2,74 @@ package manager;
 
 import tasks.Task;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private static final int MAX_HISTORY_ITEMS = 10;
-    private final LinkedList<Task> taskHistory;
+    private Node<Task> tail;
+    private final HashMap<Long, Node<Task>> taskHistory;
 
     public InMemoryHistoryManager() {
-        this.taskHistory = new LinkedList<>();
+        this.taskHistory = new HashMap<>();
     }
 
     @Override
     public void add(Task task) {
-        if(task != null) {
-            if (taskHistory.size() >= MAX_HISTORY_ITEMS) {
-                taskHistory.removeFirst();
+        if (task != null) {
+            if (taskHistory.containsKey(task.getId())) {
+                removeNode(taskHistory.get(task.getId()));
             }
-            taskHistory.add(task);
+            linkLast(task);
+            taskHistory.put(task.getId(), tail);
         }
     }
 
     @Override
+    public void remove(long id) {
+        if (taskHistory.containsKey(id)) {
+            removeNode(taskHistory.get(id));
+        }
+        taskHistory.remove(id);
+    }
+
+    @Override
     public List<Task> getHistory() {
-        return taskHistory;
+        return getTasks();
+    }
+
+    private void linkLast(Task task) {
+        Node<Task> oldTail = tail;
+
+        tail = new Node<>(oldTail, task, null);
+        if (oldTail != null) {
+            oldTail.setNext(tail);
+        }
+    }
+
+    private void removeNode(Node<Task> node) {
+        Node<Task> prev = node.getPrev();
+        Node<Task> next = node.getNext();
+
+        if (prev != null) {
+            prev.setNext(next);
+        }
+        if (next != null) {
+            next.setPrev(prev);
+        }
+        if (tail == node) {
+            tail = prev;
+        }
+    }
+
+    private List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
+
+        Node<Task> node = tail;
+        while (node != null) {
+            tasks.add(node.getData());
+            node = node.getPrev();
+        }
+        return tasks;
     }
 }
