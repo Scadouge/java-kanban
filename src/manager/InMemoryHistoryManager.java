@@ -65,17 +65,20 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node<Task> prev = node.getPrev();
         Node<Task> next = node.getNext();
 
-        if (prev != null) {
-            prev.setNext(next);
-        }
-        if (next != null) {
-            next.setPrev(prev);
-        }
-        if (tail == node) {
-            tail = prev;
-        } else if (head == node) {
+        if (prev == null) {
             head = next;
+        } else {
+            prev.setNext(next);
+            node.setPrev(null);
         }
+
+        if (next == null) {
+            tail = prev;
+        } else {
+            next.setPrev(prev);
+            node.setNext(null);
+        }
+        node.setData(null);
     }
 
     private List<Task> getTasks() {
