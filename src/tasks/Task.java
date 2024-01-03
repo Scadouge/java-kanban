@@ -2,13 +2,13 @@ package tasks;
 
 public class Task {
     private long id;
-    protected TaskType type;
+    private TaskType type;
     private String name;
     private String description;
     private Status status;
 
     public Task() {
-        type = TaskType.TASK;
+        setType(TaskType.TASK);
         status = Status.NEW;
     }
 
@@ -46,6 +46,10 @@ public class Task {
 
     public TaskType getType() {
         return type;
+    }
+
+    public void setType(TaskType type) {
+        this.type = type;
     }
 
     @Override

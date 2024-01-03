@@ -5,7 +5,7 @@ public class Subtask extends Task {
 
     public Subtask(long epicId) {
         super();
-        type = TaskType.SUBTASK;
+        setType(TaskType.SUBTASK);
         this.epicId = epicId;
     }
 
