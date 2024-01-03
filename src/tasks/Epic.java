@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class Epic extends Task {
-    public final TaskType TASK_TYPE = TaskType.EPIC;
     private final Collection<Long> subtaskIds;
 
     public Epic() {
         super();
+        setType(TaskType.EPIC);
         subtaskIds = new HashSet<>();
     }
 

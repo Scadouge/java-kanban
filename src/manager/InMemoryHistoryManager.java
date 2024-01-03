@@ -35,7 +35,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getHistory() {
+    public List<Long> getHistory() {
         return getTasks();
     }
 
@@ -46,7 +46,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (oldHead == null) {
             tail = head;
         } else {
-            oldHead.setPrev(head);
+            oldHead.prev = head;
         }
     }
 
@@ -57,74 +57,50 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (oldTail == null) {
             head = tail;
         } else {
-            oldTail.setNext(tail);
+            oldTail.next = tail;
         }
     }
 
     private void removeNode(Node<Task> node) {
-        Node<Task> prev = node.getPrev();
-        Node<Task> next = node.getNext();
+        Node<Task> prev = node.prev;
+        Node<Task> next = node.next;
 
         if (prev == null) {
             head = next;
         } else {
-            prev.setNext(next);
-            node.setPrev(null);
+            prev.next = next;
+            node.prev = null;
         }
 
         if (next == null) {
             tail = prev;
         } else {
-            next.setPrev(prev);
-            node.setNext(null);
+            next.prev = prev;
+            node.next = null;
         }
-        node.setData(null);
+        node.data = null;
     }
 
-    private List<Task> getTasks() {
-        List<Task> tasks = new ArrayList<>();
+    private List<Long> getTasks() {
+        List<Long> tasks = new ArrayList<>();
 
         Node<Task> node = head;
         while (node != null) {
-            tasks.add(node.getData());
-            node = node.getNext();
+            tasks.add(node.data.getId());
+            node = node.next;
         }
         return tasks;
     }
 
 
     private static class Node<T> {
-        private T data;
-        private Node<T> prev;
-        private Node<T> next;
+        T data;
+        Node<T> prev;
+        Node<T> next;
 
         public Node(Node<T> prev, T data, Node<T> next) {
             this.prev = prev;
             this.data = data;
-            this.next = next;
-        }
-
-        public T getData() {
-            return data;
-        }
-
-        public Node<T> getPrev() {
-            return prev;
-        }
-
-        public Node<T> getNext() {
-            return next;
-        }
-
-        public void setData(T data) {
-            this.data = data;
-        }
-
-        public void setPrev(Node<T> prev) {
-            this.prev = prev;
-        }
-
-        public void setNext(Node<T> next) {
             this.next = next;
         }
     }

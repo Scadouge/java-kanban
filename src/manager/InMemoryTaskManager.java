@@ -14,7 +14,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Long, Task> tasks;
     protected final HashMap<Long, Subtask> subtasks;
     protected final HashMap<Long, Epic> epics;
-    private final HistoryManager historyManager;
+    protected final HistoryManager historyManager;
     private long sequenceId;
 
     public InMemoryTaskManager() {
@@ -26,7 +26,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Task> getHistory() {
+    public List<Long> getHistory() {
         return historyManager.getHistory();
     }
 
