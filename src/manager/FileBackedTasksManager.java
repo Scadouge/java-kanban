@@ -79,7 +79,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 tasks.put(id, task);
         }
         task.setId(id);
-        task.setType(type);
         task.setName(split[2]);
         task.setStatus(Status.valueOf(split[3]));
         task.setDescription(split[4]);
