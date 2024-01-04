@@ -8,7 +8,7 @@ public class Epic extends Task {
 
     public Epic() {
         super();
-        setType(TaskType.EPIC);
+        type = TaskType.TASK;
         subtaskIds = new HashSet<>();
     }
 
