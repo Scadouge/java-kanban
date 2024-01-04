@@ -60,7 +60,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         //0  1    2    3      4           5
         //id,type,name,status,description,epic
         Task task;
-        Long epicId = null;
         String[] split = value.split(",");
 
         TaskType type = TaskType.valueOf(split[1]);
