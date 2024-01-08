@@ -11,7 +11,7 @@ public class Main {
     }
 
     private static void test() throws IOException {
-        TaskManager taskManager = FileBackedTasksManager.loadFromFile(new File("save.txt"));
+        TaskManager taskManager = FileBackedTasksManager.loadFromFile(new File("save.CSV"));
 
         taskManager.getEpics().forEach(System.out::println);
         taskManager.getSubtasks().forEach(System.out::println);

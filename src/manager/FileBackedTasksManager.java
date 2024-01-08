@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
+    private static final String TABLE_HEADER = "id,type,name,status,description,epic" + System.lineSeparator();
     private final Path file;
 
     public FileBackedTasksManager(Path file) {
@@ -85,7 +86,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save() {
         try (FileWriter writer = new FileWriter(file.toFile())) {
-            writer.write("id,type,name,status,description,epic" + System.lineSeparator());
+            writer.write(TABLE_HEADER);
             for (Task task : getTasks()) {
                 writer.write(taskToString(task) + System.lineSeparator());
             }
@@ -98,7 +99,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             writer.write(System.lineSeparator());
             writer.write(historyToString(historyManager));
         } catch (IOException e) {
-            throw new ManagerSaveException();
+            throw new ManagerSaveException(e.getMessage());
         }
     }
 
@@ -218,7 +219,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public static void main(String[] args) {
-        FileBackedTasksManager taskManager = new FileBackedTasksManager(Path.of("save.txt"));
+        FileBackedTasksManager taskManager = new FileBackedTasksManager(Path.of("save.CSV"));
 
         Task task1 = new Task();
         task1.setName("task1");
