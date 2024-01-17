@@ -3,6 +3,7 @@ package manager;
 import tasks.*;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -17,9 +18,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    public static FileBackedTasksManager loadFromFile(File file) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            FileBackedTasksManager manager = new FileBackedTasksManager(file.toPath());
+    public static FileBackedTasksManager loadFromFile(Path file) throws IOException {
+        try (BufferedReader br = Files.newBufferedReader(file)) {
+            FileBackedTasksManager manager = new FileBackedTasksManager(file);
             boolean nextLineIsHistory = false;
             if (br.ready()) { // skip 1 line
                 br.readLine();
@@ -85,7 +86,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        try (FileWriter writer = new FileWriter(file.toFile())) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
             writer.write(TABLE_HEADER);
             for (Task task : getTasks()) {
                 writer.write(taskToString(task) + System.lineSeparator());
