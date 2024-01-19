@@ -1,8 +1,8 @@
 import manager.FileBackedTasksManager;
 import manager.TaskManager;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class Main {
 
@@ -11,7 +11,7 @@ public class Main {
     }
 
     private static void test() throws IOException {
-        TaskManager taskManager = FileBackedTasksManager.loadFromFile(new File("save.CSV"));
+        TaskManager taskManager = FileBackedTasksManager.loadFromFile(Path.of("save.CSV"));
 
         taskManager.getEpics().forEach(System.out::println);
         taskManager.getSubtasks().forEach(System.out::println);
