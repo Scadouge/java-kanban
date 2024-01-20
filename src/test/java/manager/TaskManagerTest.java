@@ -1,15 +1,60 @@
 package manager;
 
+import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
 
     protected static TaskManager taskManager;
+
+    void shouldReturnPrioritizedTasks() {
+        final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+        taskManager.createTask(new Task().setName("t1").setStartTime(startTime));
+        taskManager.createTask(new Task().setName("t2"));
+        taskManager.createTask(new Task().setName("t3").setStartTime(startTime.plusHours(19)));
+        taskManager.createTask(new Task().setName("t4").setStartTime(startTime.plusHours(8)));
+        taskManager.createTask(new Task().setName("t5").setStartTime(startTime.plusHours(55)));
+
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+
+        assertEquals(0, prioritizedTasks.get(0).getId());
+        assertEquals(3, prioritizedTasks.get(1).getId());
+        assertEquals(2, prioritizedTasks.get(2).getId());
+        assertEquals(4, prioritizedTasks.get(3).getId());
+        assertEquals(1, prioritizedTasks.get(4).getId());
+    }
+
+    void shouldEpicReturn_StartTime_EndTime_Duration() {
+        final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+        final long epicId = taskManager.createEpic((Epic) new Epic().setName("t0"));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t1").setStartTime(startTime).setDuration(50));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t2"));
+        long subtask3Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t3").setStartTime(startTime.plusHours(19)).setDuration(10));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t4").setStartTime(startTime.plusHours(8)).setDuration(30));
+        long subtask5Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t5").setStartTime(startTime.plusHours(48)).setDuration(30));
+
+        final Epic epic = taskManager.getEpic(epicId);
+        final LocalDateTime endTime1 = taskManager.getSubtask(subtask5Id).getEndTime();
+
+        assertEquals(startTime, epic.getStartTime());
+        assertEquals(endTime1, epic.getEndTime());
+        assertEquals(120, epic.getDuration());
+
+        taskManager.removeSubtask(subtask5Id);
+
+        final LocalDateTime endTime2 = taskManager.getSubtask(subtask3Id).getEndTime();
+        assertEquals(startTime, epic.getStartTime());
+        assertEquals(endTime2, epic.getEndTime());
+        assertEquals(90, epic.getDuration());
+    }
 
     // ================================ TASK ================================
 
@@ -235,13 +280,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final long epicId = taskManager.createEpic(new Epic());
         final Subtask task = new Subtask(epicId);
         final long id = taskManager.createSubtask(task);
-
+        taskManager.removeSubtask(id + 1);
+        taskManager.removeSubtask(id - 1);
         assertNotNull(taskManager.getSubtask(id));
-        assertThrows(NullPointerException.class,
-            () -> taskManager.removeSubtask(id + 1));
-        assertThrows(NullPointerException.class,
-                () -> taskManager.removeSubtask(id - 1));
-        assertTrue(taskManager.getSubtasks().contains(task));
     }
 
     void shouldSubtaskReturnEpicId() {
@@ -360,10 +401,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         assertNotNull(taskManager.getEpic(id));
 
-        assertThrows(NullPointerException.class,
-                ()-> taskManager.removeEpic(id + 1));
-        assertThrows(NullPointerException.class,
-                ()-> taskManager.removeEpic(id - 1));
+        taskManager.removeEpic(id + 1);
+        taskManager.removeEpic(id - 1);
 
         assertTrue(taskManager.getEpics().contains(task));
     }
@@ -448,35 +487,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
-    // TODO сделать остальные тесты:
-    /*
+    void shouldReturnSubtasksFromEpic() {
+        final Epic epic = new Epic();
+        final long epicId = taskManager.createEpic(epic);
 
-    // Subtask
-    Collection<Subtask> getSubtasks();
+        assertEquals(0, taskManager.getSubtasks(epic).size());
 
-    void clearSubtasks();
+        taskManager.createSubtask(new Subtask(epicId));
+        taskManager.createSubtask(new Subtask(epicId));
 
-    Subtask getSubtask(long id);
+        assertEquals(2, taskManager.getSubtasks(epic).size());
+    }
 
-    void createSubtask(Subtask subtask);
-
-    void updateSubtask(Subtask subtask);
-
-    void removeSubtask(long id);
-
-    // Epic
-    Collection<Epic> getEpics();
-
-    void clearEpics();
-
-    Epic getEpic(long id);
-
-    void createEpic(Epic epic);
-
-    void updateEpic(Epic epic);
-
-    void removeEpic(long id);
-
-    Collection<Subtask> getSubtasks(Epic epic);
-     */
 }

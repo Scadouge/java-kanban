@@ -2,7 +2,9 @@ package manager;
 
 import tasks.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -220,61 +222,5 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             task = epics.get(id);
         }
         return task;
-    }
-
-    public static void main(String[] args) {
-        FileBackedTasksManager taskManager = new FileBackedTasksManager(Path.of("src/main/resources/save.CSV"));
-
-        Task task1 = new Task();
-        task1.setName("task1");
-        taskManager.createTask(task1);
-
-        Task task2 = new Task();
-        task2.setName("task2");
-        taskManager.createTask(task2);
-
-        Epic epic1 = new Epic();
-        epic1.setName("epic1");
-        taskManager.createEpic(epic1);
-
-        Subtask subtask1 = new Subtask(epic1.getId());
-        subtask1.setName("subtask1");
-        subtask1.setStatus(Status.IN_PROGRESS);
-        taskManager.createSubtask(subtask1);
-
-        Subtask subtask2 = new Subtask(epic1.getId());
-        subtask2.setName("subtask2");
-        subtask2.setStatus(Status.DONE);
-        taskManager.createSubtask(subtask2);
-
-        Epic epic2 = new Epic();
-        epic2.setName("epic2");
-        taskManager.createEpic(epic2);
-
-        // History
-        taskManager.getTask(task1.getId());
-
-        taskManager.getSubtask(subtask2.getId());
-
-        taskManager.getEpic(epic2.getId());
-
-        taskManager.getSubtask(subtask1.getId());
-        taskManager.getSubtask(subtask1.getId());
-
-        taskManager.getSubtask(subtask2.getId());
-        taskManager.getSubtask(subtask2.getId());
-
-        taskManager.getSubtask(subtask1.getId());
-        taskManager.getSubtask(subtask1.getId());
-
-        taskManager.getTasks().forEach(System.out::println);
-        taskManager.getEpics().forEach(System.out::println);
-        taskManager.getSubtasks().forEach(System.out::println);
-
-        System.out.println("---------------------------------");
-        taskManager.getHistory().forEach(System.out::println);
-        System.out.println("---------------------------------");
-
-        System.out.println();
     }
 }

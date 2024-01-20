@@ -12,6 +12,18 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
     @Test
     @Override
+    void shouldReturnPrioritizedTasks() {
+        super.shouldReturnPrioritizedTasks();
+    }
+
+    @Test
+    @Override
+    void shouldEpicReturn_StartTime_EndTime_Duration() {
+        super.shouldEpicReturn_StartTime_EndTime_Duration();
+    }
+
+    @Test
+    @Override
     void shouldReturnCollectionWithOneTaskWhenTaskCreated() {
         super.shouldReturnCollectionWithOneTaskWhenTaskCreated();
     }
@@ -266,5 +278,11 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Override
     void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() {
         super.shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS();
+    }
+
+    @Test
+    @Override
+    void shouldReturnSubtasksFromEpic() {
+        super.shouldReturnSubtasksFromEpic();
     }
 }

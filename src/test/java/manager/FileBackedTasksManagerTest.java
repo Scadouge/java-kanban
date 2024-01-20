@@ -8,16 +8,15 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
@@ -30,6 +29,18 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
             Files.delete(TEST_SAVE_FILE);
         }
         taskManager = new FileBackedTasksManager(TEST_SAVE_FILE);
+    }
+
+    @Test
+    @Override
+    void shouldReturnPrioritizedTasks() {
+        super.shouldReturnPrioritizedTasks();
+    }
+
+    @Test
+    @Override
+    void shouldEpicReturn_StartTime_EndTime_Duration() {
+        super.shouldEpicReturn_StartTime_EndTime_Duration();
     }
 
     @Test
@@ -446,5 +457,11 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     @Override
     void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() {
         super.shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS();
+    }
+
+    @Test
+    @Override
+    void shouldReturnSubtasksFromEpic() {
+        super.shouldReturnSubtasksFromEpic();
     }
 }
