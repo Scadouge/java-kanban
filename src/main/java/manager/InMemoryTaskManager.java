@@ -50,9 +50,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public long createTask(Task task) {
         task.setId(generateId());
         tasks.put(task.getId(), task);
+        return task.getId();
     }
 
     @Override
@@ -94,7 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
+    public long createSubtask(Subtask subtask) {
         if(epics.containsKey(subtask.getEpicId())) {
             subtask.setId(generateId());
             Epic epic = epics.get(subtask.getEpicId());
@@ -104,6 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println("Не найден епик, при создании подзадачи " + subtask);
         }
+        return subtask.getId();
     }
 
     @Override
@@ -149,9 +151,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createEpic(Epic epic) {
+    public long createEpic(Epic epic) {
         epic.setId(generateId());
         epics.put(epic.getId(), epic);
+        return epic.getId();
     }
 
     @Override

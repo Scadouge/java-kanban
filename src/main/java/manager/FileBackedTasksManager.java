@@ -128,9 +128,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
-        super.createTask(task);
+    public long createTask(Task task) {
+        long id = super.createTask(task);
         save();
+        return id;
     }
 
     @Override
@@ -159,9 +160,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
-        super.createSubtask(subtask);
+    public long createSubtask(Subtask subtask) {
+        long id = super.createSubtask(subtask);
         save();
+        return id;
     }
 
     @Override
@@ -190,9 +192,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createEpic(Epic epic) {
-        super.createEpic(epic);
+    public long createEpic(Epic epic) {
+        long id = super.createEpic(epic);
         save();
+        return id;
     }
 
     @Override
@@ -220,7 +223,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public static void main(String[] args) {
-        FileBackedTasksManager taskManager = new FileBackedTasksManager(Path.of("save.CSV"));
+        FileBackedTasksManager taskManager = new FileBackedTasksManager(Path.of("src/main/resources/save.CSV"));
 
         Task task1 = new Task();
         task1.setName("task1");
