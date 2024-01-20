@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     private final static Path TEST_SAVE_FILE = Path.of("src/test/resources/save.CSV");
-    private final static String FILE_HEADER = "id,type,name,status,description,epic";
+    private final static String FILE_HEADER = "id,type,name,status,description,epic,time,duration";
 
     @BeforeEach
     public void createTaskManager() throws IOException {
@@ -44,7 +45,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    void shouldSaveTwoTasksAndHistory() {
+    void shouldSaveAndLoadTwoTasksAndHistory() throws IOException {
         final Task task = new Task();
         task.setName("TASK NAME");
         final long task1Id = taskManager.createTask(task);
@@ -70,36 +71,20 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(7, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), task1Id + ",TASK,TASK NAME,NEW,null,");
-        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,");
-        assertEquals(lines.get(3), subtaskId + ",SUBTASK,null,IN_PROGRESS,null," + epicId);
-        assertEquals(lines.get(4), epicId + ",EPIC,null,IN_PROGRESS,null,");
+        assertEquals(lines.get(1), task1Id + ",TASK,TASK NAME,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(3), subtaskId + ",SUBTASK,null,IN_PROGRESS,null," + epicId + "," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(4), epicId + ",EPIC,null,IN_PROGRESS,null,," + LocalDateTime.MAX + ",0");
         assertTrue(lines.get(5).isEmpty());
         assertEquals(lines.get(6), String.join(",",
                 String.valueOf(task1Id),
                 String.valueOf(task2Id),
                 String.valueOf(subtaskId),
                 String.valueOf(epicId)));
-    }
-
-    @Test
-    void shouldLoadTwoTasksAndHistory() throws IOException {
-        final Task task = new Task();
-        task.setName("TASK NAME");
-        final long task1Id = taskManager.createTask(task);
-        final long task2Id = taskManager.createTask(new Task());
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask subtask = new Subtask(epicId);
-        subtask.setStatus(Status.IN_PROGRESS);
-        final long subtaskId = taskManager.createSubtask(subtask);
-        taskManager.getEpic(epicId); // 2
-        taskManager.getTask(task1Id); // 0
-        taskManager.getTask(task2Id); // 1
-        taskManager.getSubtask(subtaskId); // 3
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
 
-        assertEquals(List.of(epicId, task1Id, task2Id, subtaskId), manager.getHistory());
+        assertEquals(List.of(task1Id, task2Id, subtaskId, epicId), manager.getHistory());
         assertEquals(4, manager.getHistory().size());
         assertEquals(2, manager.getTasks().size());
         assertEquals(1, manager.getEpics().size());
@@ -110,7 +95,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    void shouldSaveEmptyTasksAndHistory() {
+    void shouldSaveAndLoadEmptyTasksAndHistory() throws IOException {
         taskManager.clearTasks();
 
         List<String> lines = new ArrayList<>();
@@ -125,13 +110,9 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(2, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
         assertTrue(lines.get(1).isEmpty());
-    }
-
-    @Test
-    void shouldLoadEmptyTasksAndHistory() throws IOException {
-        taskManager.clearTasks();
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
+
         assertEquals(0, taskManager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
@@ -139,7 +120,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    void shouldSaveOneEpic() {
+    void shouldSaveAndLoadOneEpic() throws IOException {
         long epicId = taskManager.createEpic(new Epic());
 
         List<String> lines = new ArrayList<>();
@@ -153,15 +134,11 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(3, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), epicId + ",EPIC,null,NEW,null,");
+        assertEquals(lines.get(1), epicId + ",EPIC,null,NEW,null,," + LocalDateTime.MAX + ",0");
         assertTrue(lines.get(2).isEmpty());
-    }
-
-    @Test
-    void shouldLoadOneEpic() throws IOException {
-        taskManager.createEpic(new Epic());
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
+
         assertEquals(0, taskManager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(1, manager.getEpics().size());
@@ -169,7 +146,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    void shouldSaveTasksWithoutHistory() {
+    void shouldSaveAndLoadTasksWithoutHistory() throws IOException {
         final long task1Id = taskManager.createTask(new Task());
         final long task2Id = taskManager.createTask(new Task());
 
@@ -184,17 +161,12 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(4, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), task1Id + ",TASK,null,NEW,null,");
-        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,");
+        assertEquals(lines.get(1), task1Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
         assertTrue(lines.get(3).isEmpty());
-    }
-
-    @Test
-    void shouldLoadTasksWithoutHistory() throws IOException {
-        taskManager.createTask(new Task());
-        taskManager.createTask(new Task());
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
+
         assertEquals(0, taskManager.getHistory().size());
         assertEquals(2, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
