@@ -7,13 +7,14 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String TABLE_HEADER = "id,type,name,status,description,epic" + System.lineSeparator();
+    private static final String TABLE_HEADER = "id,type,name,status,description,epic,time,duration" + System.lineSeparator();
     private final Path file;
 
     public FileBackedTasksManager(Path file) {
@@ -61,8 +62,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void createTaskFromString(String value) {
-        //0  1    2    3      4           5
-        //id,type,name,status,description,epic
+        //0  1    2    3      4           5    6    7
+        //id,type,name,status,description,epic,time,duration
         Task task;
         String[] split = value.split(",");
 
@@ -85,6 +86,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         task.setName(split[2]);
         task.setStatus(Status.valueOf(split[3]));
         task.setDescription(split[4]);
+        task.setStartTime(LocalDateTime.parse(split[6]));
+        task.setDuration(Integer.parseInt(split[7]));
     }
 
     private void save() {
@@ -107,13 +110,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private String taskToString(Task task) {
-        //id,type,name,status,description,epic
-        String str = String.join(",", String.valueOf(task.getId()), task.getType().toString(),
-                task.getName(), task.getStatus().toString(), task.getDescription(), "");
+        //id,type,name,status,description,epic,time,duration
+        String epicId = "";
         if (task.getType() == TaskType.SUBTASK) {
-            str = str + ((Subtask) task).getEpicId();
+            epicId = String.valueOf(((Subtask) task).getEpicId());
         }
-        return str;
+        return String.join(",", String.valueOf(task.getId()), task.getType().toString(),
+                task.getName(), task.getStatus().toString(), task.getDescription(),
+                epicId, task.getStartTime().toString(), String.valueOf(task.getDuration()));
     }
 
     @Override
