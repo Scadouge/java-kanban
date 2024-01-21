@@ -20,37 +20,37 @@ public interface TaskManager {
 
     Task getTask(long id);
 
-    long createTask(Task task);
+    long createTask(Task task) throws ManagerTaskException;
 
-    void updateTask(Task task);
+    void updateTask(Task task) throws ManagerTaskException;
 
     void removeTask(long id);
 
     // Subtask
-    Collection<Subtask> getSubtasks();
+    List<Subtask> getSubtasks();
 
     void clearSubtasks();
 
     Subtask getSubtask(long id);
 
-    long createSubtask(Subtask subtask);
+    long createSubtask(Subtask subtask) throws ManagerTaskException;
 
-    void updateSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask) throws ManagerTaskException;
 
     void removeSubtask(long id);
 
     // Epic
-    Collection<Epic> getEpics();
+    List<Epic> getEpics();
 
     void clearEpics();
 
     Epic getEpic(long id);
 
-    long createEpic(Epic epic);
+    long createEpic(Epic epic) throws ManagerTaskException;
 
-    void updateEpic(Epic epic);
+    void updateEpic(Epic epic) throws ManagerTaskException;
 
     void removeEpic(long id);
 
-    Collection<Subtask> getSubtasks(Epic epic);
+    List<Subtask> getSubtasks(Epic epic);
 }

@@ -1,6 +1,9 @@
 package tasks;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Task {
@@ -19,6 +22,8 @@ public class Task {
         duration = 0;
         startTime = LocalDateTime.MAX;
     }
+
+
 
     public long getId() {
         return id;
@@ -97,7 +102,7 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && type == task.type;
+        return id == task.id;
     }
 
     @Override

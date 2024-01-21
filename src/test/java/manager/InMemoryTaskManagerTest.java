@@ -12,277 +12,175 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
     @Test
     @Override
-    void shouldReturnPrioritizedTasks() {
-        super.shouldReturnPrioritizedTasks();
+    void should_createTask_updateTask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
+        super.should_createTask_updateTask_ThrowException_WhenIntervalsAlreadyClaimed();
     }
 
     @Test
     @Override
-    void shouldEpicReturn_StartTime_EndTime_Duration() {
-        super.shouldEpicReturn_StartTime_EndTime_Duration();
+    void should_createSubtask_updateSubtask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
+        super.should_createSubtask_updateSubtask_ThrowException_WhenIntervalsAlreadyClaimed();
     }
 
     @Test
     @Override
-    void shouldReturnCollectionWithOneTaskWhenTaskCreated() {
-        super.shouldReturnCollectionWithOneTaskWhenTaskCreated();
+    void should_getPrioritizedTasks_ReturnPrioritizedTasks() throws ManagerTaskException {
+        super.should_getPrioritizedTasks_ReturnPrioritizedTasks();
     }
 
     @Test
     @Override
-    void shouldReturnEmptyCollectionWhenNoTaskCreated() {
-        super.shouldReturnEmptyCollectionWhenNoTaskCreated();
+    void should_getStartTime_getEndTime_getDuration_ReturnCorrectData() throws ManagerTaskException {
+        super.should_getStartTime_getEndTime_getDuration_ReturnCorrectData();
     }
 
     @Test
     @Override
-    void shouldClearAllTasksWhenTaskCreated() {
-        super.shouldClearAllTasksWhenTaskCreated();
+    void should_getTasks_ReturnTasks() throws ManagerTaskException {
+        super.should_getTasks_ReturnTasks();
     }
 
     @Test
     @Override
-    void shouldClearAllTasksWhenNoTaskCreated() {
-        super.shouldClearAllTasksWhenNoTaskCreated();
+    void should_clearTasks_RemoveAllTasks() throws ManagerTaskException {
+        super.should_clearTasks_RemoveAllTasks();
     }
 
     @Test
     @Override
-    void shouldReturnExistingTask() {
-        super.shouldReturnExistingTask();
+    void should_getTask_ReturnExistingTask() throws ManagerTaskException {
+        super.should_getTask_ReturnExistingTask();
     }
 
     @Test
     @Override
-    void shouldReturnNullWhenTasksEmpty() {
-        super.shouldReturnNullWhenTasksEmpty();
+    void should_createTask_CreateNewTask() throws ManagerTaskException {
+        super.should_createTask_CreateNewTask();
     }
 
     @Test
     @Override
-    void shouldCreateNewTask() {
-        super.shouldCreateNewTask();
+    void should_updateTask_UpdateExistingTask() throws ManagerTaskException {
+        super.should_updateTask_UpdateExistingTask();
     }
 
     @Test
     @Override
-    void shouldUpdateTask() {
-        super.shouldUpdateTask();
+    void should_removeTask_RemoveExistingTask() throws ManagerTaskException {
+        super.should_removeTask_RemoveExistingTask();
     }
 
     @Test
     @Override
-    void shouldNotUpdateTaskWhenWrongIdGiven() {
-        super.shouldNotUpdateTaskWhenWrongIdGiven();
+    void should_getSubtasks_ReturnSubtasks() throws ManagerTaskException {
+        super.should_getSubtasks_ReturnSubtasks();
     }
 
     @Test
     @Override
-    void shouldRemoveExistingTask() {
-        super.shouldRemoveExistingTask();
+    void should_clearSubtasks_RemoveAllSubtasks() throws ManagerTaskException {
+        super.should_clearSubtasks_RemoveAllSubtasks();
     }
 
     @Test
     @Override
-    void shouldNotCreateTaskWhenUpdatedTaskNonExistent() {
-        super.shouldNotCreateTaskWhenUpdatedTaskNonExistent();
+    void should_getSubtask_ReturnExistingSubtask() throws ManagerTaskException {
+        super.should_getSubtask_ReturnExistingSubtask();
     }
 
     @Test
     @Override
-    void shouldNotRemoveExistingTask() {
-        super.shouldNotRemoveExistingTask();
+    void should_createSubtask_CreateNewSubtask() throws ManagerTaskException {
+        super.should_createSubtask_CreateNewSubtask();
     }
 
     @Test
     @Override
-    void shouldReturnCollectionWithOneSubtaskWhenSubtaskCreated() {
-        super.shouldReturnCollectionWithOneSubtaskWhenSubtaskCreated();
+    void should_updateSubtask_UpdateExistingSubtask() throws ManagerTaskException {
+        super.should_updateSubtask_UpdateExistingSubtask();
     }
 
     @Test
     @Override
-    void shouldReturnEmptyCollectionWhenNoSubtaskCreated() {
-        super.shouldReturnEmptyCollectionWhenNoSubtaskCreated();
+    void should_removeSubtask_RemoveExistingSubtask() throws ManagerTaskException {
+        super.should_removeSubtask_RemoveExistingSubtask();
     }
 
     @Test
     @Override
-    void shouldClearAllSubtasksWhenSubtaskCreated() {
-        super.shouldClearAllSubtasksWhenSubtaskCreated();
+    void should_getEpicId_ReturnEpicId() throws ManagerTaskException {
+        super.should_getEpicId_ReturnEpicId();
     }
 
     @Test
     @Override
-    void shouldClearAllSubtasksWhenNoSubtaskCreated() {
-        super.shouldClearAllSubtasksWhenNoSubtaskCreated();
+    void should_getEpics_ReturnEpics() throws ManagerTaskException {
+        super.should_getEpics_ReturnEpics();
     }
 
     @Test
     @Override
-    void shouldReturnExistingSubtask() {
-        super.shouldReturnExistingSubtask();
+    void should_clearEpics_RemoveAllEpics() throws ManagerTaskException {
+        super.should_clearEpics_RemoveAllEpics();
     }
 
     @Test
     @Override
-    void shouldReturnNullWhenSubtasksEmpty() {
-        super.shouldReturnNullWhenSubtasksEmpty();
+    void should_getEpic_ReturnExistingEpic() throws ManagerTaskException {
+        super.should_getEpic_ReturnExistingEpic();
     }
 
     @Test
     @Override
-    void shouldCreateNewSubtask() {
-        super.shouldCreateNewSubtask();
+    void should_createEpic_CreateNewEpic() throws ManagerTaskException {
+        super.should_createEpic_CreateNewEpic();
     }
 
     @Test
     @Override
-    void shouldUpdateSubtask() {
-        super.shouldUpdateSubtask();
+    void should_updateEpic_UpdateExistingEpic() throws ManagerTaskException {
+        super.should_updateEpic_UpdateExistingEpic();
     }
 
     @Test
     @Override
-    void shouldNotUpdateSubtaskWhenWrongIdGiven() {
-        super.shouldNotUpdateSubtaskWhenWrongIdGiven();
+    void should_removeEpic_RemoveExistingEpic() throws ManagerTaskException {
+        super.should_removeEpic_RemoveExistingEpic();
     }
 
     @Test
     @Override
-    void shouldNotCreateSubtaskWhenUpdatedSubtaskNonExistent() {
-        super.shouldNotCreateSubtaskWhenUpdatedSubtaskNonExistent();
+    void should_getSubtaskIds_ReturnSubtasksIds() throws ManagerTaskException {
+        super.should_getSubtaskIds_ReturnSubtasksIds();
     }
 
     @Test
     @Override
-    void shouldRemoveExistingSubtask() {
-        super.shouldRemoveExistingSubtask();
+    void should_getStatus_NEW_WhenSubtasksEmpty() throws ManagerTaskException {
+        super.should_getStatus_NEW_WhenSubtasksEmpty();
     }
 
     @Test
     @Override
-    void shouldNotRemoveExistingSubtask() {
-        super.shouldNotRemoveExistingSubtask();
+    void should_getStatus_NEW_WhenSubtasks_NEW() throws ManagerTaskException {
+        super.should_getStatus_NEW_WhenSubtasks_NEW();
     }
 
     @Test
     @Override
-    void shouldSubtaskReturnEpicId() {
-        super.shouldSubtaskReturnEpicId();
+    void should_getStatus_DONE_WhenSubtasks_DONE() throws ManagerTaskException {
+        super.should_getStatus_DONE_WhenSubtasks_DONE();
     }
 
     @Test
     @Override
-    void shouldReturnCollectionWithOneEpicWhenEpicCreated() {
-        super.shouldReturnCollectionWithOneEpicWhenEpicCreated();
+    void should_getStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW() throws ManagerTaskException {
+        super.should_getStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW();
     }
 
     @Test
     @Override
-    void shouldReturnEmptyCollectionWhenNoEpicCreated() {
-        super.shouldReturnEmptyCollectionWhenNoEpicCreated();
-    }
-
-    @Test
-    @Override
-    void shouldClearAllEpicsWhenEpicCreated() {
-        super.shouldClearAllEpicsWhenEpicCreated();
-    }
-
-    @Test
-    @Override
-    void shouldClearAllEpicsWhenNoEpicCreated() {
-        super.shouldClearAllEpicsWhenNoEpicCreated();
-    }
-
-    @Test
-    @Override
-    void shouldReturnExistingEpic() {
-        super.shouldReturnExistingEpic();
-    }
-
-    @Test
-    @Override
-    void shouldReturnNullWhenEpicsEmpty() {
-        super.shouldReturnNullWhenEpicsEmpty();
-    }
-
-    @Test
-    @Override
-    void shouldCreateNewEpic() {
-        super.shouldCreateNewEpic();
-    }
-
-    @Test
-    @Override
-    void shouldUpdateEpic() {
-        super.shouldUpdateEpic();
-    }
-
-    @Test
-    @Override
-    void shouldNotUpdateEpicWhenWrongIdGiven() {
-        super.shouldNotUpdateEpicWhenWrongIdGiven();
-    }
-
-    @Test
-    @Override
-    void shouldNotCreateEpicWhenUpdatedEpicNonExistent() {
-        super.shouldNotCreateEpicWhenUpdatedEpicNonExistent();
-    }
-
-    @Test
-    @Override
-    void shouldRemoveExistingEpic() {
-        super.shouldRemoveExistingEpic();
-    }
-
-    @Test
-    @Override
-    void shouldNotRemoveExistingEpic() {
-        super.shouldNotRemoveExistingEpic();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnSubtask() {
-        super.shouldEpicReturnSubtask();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnStatus_NEW_WhenSubtasksEmpty() {
-        super.shouldEpicReturnStatus_NEW_WhenSubtasksEmpty();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnStatus_NEW_WhenSubtasks_NEW() {
-        super.shouldEpicReturnStatus_NEW_WhenSubtasks_NEW();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnStatus_DONE_WhenSubtasks_DONE() {
-        super.shouldEpicReturnStatus_DONE_WhenSubtasks_DONE();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW() {
-        super.shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW();
-    }
-
-    @Test
-    @Override
-    void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() {
-        super.shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS();
-    }
-
-    @Test
-    @Override
-    void shouldReturnSubtasksFromEpic() {
-        super.shouldReturnSubtasksFromEpic();
+    void should_getStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() throws ManagerTaskException {
+        super.should_getStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS();
     }
 }

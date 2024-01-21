@@ -15,65 +15,122 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     protected static TaskManager taskManager;
 
-    void shouldReturnPrioritizedTasks() {
+    void should_createTask_updateTask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
         final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+        final long taskId = taskManager.createTask(new Task().setStartTime(startTime).setDuration(50));
+
+        assertDoesNotThrow(
+                () -> taskManager.updateTask(new Task().setId(taskId).setStartTime(startTime).setDuration(45)));
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Task().setStartTime(startTime.minusMinutes(30)).setDuration(5)));
+
+        assertThrows(ManagerTaskException.class,
+                () -> taskManager.createTask(new Task().setStartTime(startTime).setDuration(55)));
+
+        taskManager.removeTask(taskId);
+
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Task().setId(taskId).setStartTime(startTime).setDuration(55)));
+
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Task()));
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Task()));
+    }
+
+    void should_createSubtask_updateSubtask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
+        final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+        final long epicId = taskManager.createEpic(new Epic());
+        final long subtaskId = taskManager.createSubtask((Subtask) new Subtask(epicId).setStartTime(startTime).setDuration(50));
+
+        assertDoesNotThrow(
+                () -> taskManager.updateSubtask((Subtask) new Subtask(epicId).setId(subtaskId).setStartTime(startTime).setDuration(45)));
+        assertDoesNotThrow(
+                () -> taskManager.createSubtask((Subtask) new Subtask(epicId).setStartTime(startTime.minusMinutes(30)).setDuration(5)));
+
+        assertThrows(ManagerTaskException.class,
+                () -> taskManager.createSubtask((Subtask) new Subtask(epicId).setStartTime(startTime).setDuration(55)));
+
+        taskManager.removeSubtask(subtaskId);
+
+        assertDoesNotThrow(
+                () -> taskManager.createSubtask((Subtask) new Subtask(epicId).setId(subtaskId).setStartTime(startTime).setDuration(55)));
+
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Subtask(epicId)));
+        assertDoesNotThrow(
+                () -> taskManager.createTask(new Subtask(epicId)));
+    }
+
+    void should_getPrioritizedTasks_ReturnPrioritizedTasks() throws ManagerTaskException {
+        final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+        final long epicId = taskManager.createEpic(new Epic());
         taskManager.createTask(new Task().setName("t1").setStartTime(startTime));
-        taskManager.createTask(new Task().setName("t2"));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t2"));
         taskManager.createTask(new Task().setName("t3").setStartTime(startTime.plusHours(19)));
         taskManager.createTask(new Task().setName("t4").setStartTime(startTime.plusHours(8)));
         taskManager.createTask(new Task().setName("t5").setStartTime(startTime.plusHours(55)));
 
-        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
+        final List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
 
-        assertEquals(0, prioritizedTasks.get(0).getId());
-        assertEquals(3, prioritizedTasks.get(1).getId());
-        assertEquals(2, prioritizedTasks.get(2).getId());
-        assertEquals(4, prioritizedTasks.get(3).getId());
-        assertEquals(1, prioritizedTasks.get(4).getId());
+        assertEquals(5, prioritizedTasks.size());
+        assertEquals(1, prioritizedTasks.get(0).getId());
+        assertEquals(4, prioritizedTasks.get(1).getId());
+        assertEquals(3, prioritizedTasks.get(2).getId());
+        assertEquals(5, prioritizedTasks.get(3).getId());
+        assertEquals(2, prioritizedTasks.get(4).getId());
     }
 
-    void shouldEpicReturn_StartTime_EndTime_Duration() {
-        final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
+    @Test
+    void should_getStartTime_getEndTime_getDuration_ReturnCorrectData() throws ManagerTaskException {
+        final LocalDateTime startTime1 = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
         final long epicId = taskManager.createEpic((Epic) new Epic().setName("t0"));
-        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t1").setStartTime(startTime).setDuration(50));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t1").setStartTime(startTime1).setDuration(50));
         taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t2"));
-        long subtask3Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t3").setStartTime(startTime.plusHours(19)).setDuration(10));
-        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t4").setStartTime(startTime.plusHours(8)).setDuration(30));
-        long subtask5Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t5").setStartTime(startTime.plusHours(48)).setDuration(30));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t3").setStartTime(startTime1.plusHours(19)).setDuration(10));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t4").setStartTime(startTime1.plusHours(8)).setDuration(30));
+        long subtask5Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t5").setStartTime(startTime1.plusHours(48)).setDuration(30));
 
         final Epic epic = taskManager.getEpic(epicId);
-        final LocalDateTime endTime1 = taskManager.getSubtask(subtask5Id).getEndTime();
+        final LocalDateTime endTime1 = startTime1.plusHours(48).plusMinutes(30); // task t5
 
-        assertEquals(startTime, epic.getStartTime());
+        assertEquals(startTime1, epic.getStartTime());
         assertEquals(endTime1, epic.getEndTime());
         assertEquals(120, epic.getDuration());
 
         taskManager.removeSubtask(subtask5Id);
 
-        final LocalDateTime endTime2 = taskManager.getSubtask(subtask3Id).getEndTime();
-        assertEquals(startTime, epic.getStartTime());
+        final LocalDateTime endTime2 = startTime1.plusHours(19).plusMinutes(10); // task t3
+        assertEquals(startTime1, epic.getStartTime());
         assertEquals(endTime2, epic.getEndTime());
         assertEquals(90, epic.getDuration());
+
+        final LocalDateTime startTime2 = startTime1.plusHours(100);
+        Task task6 = new Task().setName("t6").setStartTime(startTime2);
+        taskManager.createTask(task6);
+        assertEquals(startTime2, task6.getStartTime());
+        assertEquals(startTime2, task6.getEndTime());
+        assertEquals(0, task6.getDuration());
     }
 
     // ================================ TASK ================================
 
-    void shouldReturnCollectionWithOneTaskWhenTaskCreated() {
+    void should_getTasks_ReturnTasks() throws ManagerTaskException {
+        assertEquals(0, taskManager.getTasks().size());
+
         final Task task = new Task();
         taskManager.createTask(task);
 
+        assertEquals(1, taskManager.getTasks().size());
         assertTrue(taskManager.getTasks().contains(task));
-        assertEquals(1, taskManager.getTasks().size());
     }
 
-    void shouldReturnEmptyCollectionWhenNoTaskCreated() {
+    void should_clearTasks_RemoveAllTasks() throws ManagerTaskException {
+        taskManager.clearTasks();
+
         assertTrue(taskManager.getTasks().isEmpty());
-    }
 
-    void shouldClearAllTasksWhenTaskCreated() {
-        final Task task = new Task();
-        taskManager.createTask(task);
-
+        taskManager.createTask(new Task());
         assertEquals(1, taskManager.getTasks().size());
 
         taskManager.clearTasks();
@@ -81,24 +138,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getTasks().isEmpty());
     }
 
-    void shouldClearAllTasksWhenNoTaskCreated() {
-        taskManager.clearTasks();
+    void should_getTask_ReturnExistingTask() throws ManagerTaskException {
+        assertNull(taskManager.getTask(-1));
 
-        assertTrue(taskManager.getTasks().isEmpty());
-    }
-
-    void shouldReturnExistingTask() {
         final Task task = new Task();
         final long id = taskManager.createTask(task);
 
         assertEquals(task, taskManager.getTask(id));
     }
 
-    void shouldReturnNullWhenTasksEmpty() {
-        assertNull(taskManager.getTask(-1));
-    }
-
-    void shouldCreateNewTask() {
+    void should_createTask_CreateNewTask() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
 
         taskManager.createTask(new Task());
@@ -106,49 +155,26 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, taskManager.getTasks().size());
     }
 
-    void shouldUpdateTask() {
-        final Task task = new Task();
-        task.setName("task_name");
-        final long id = taskManager.createTask(task);
+    void should_updateTask_UpdateExistingTask() throws ManagerTaskException {
+        final long id = taskManager.createTask(new Task().setName("task_name"));
 
         assertEquals("task_name", taskManager.getTask(id).getName());
 
-        final Task newtask = new Task();
-        newtask.setId(id);
-        newtask.setName("new_task_name");
-        taskManager.updateTask(newtask);
+        final Task newTaskWrongId = new Task().setId(-1).setName("new_task_name");
+        assertThrows(ManagerTaskException.class,
+                () -> taskManager.updateTask(newTaskWrongId));
+        assertEquals("task_name", taskManager.getTask(id).getName());
+
+        taskManager.updateTask(new Task().setId(id).setName("new_task_name"));
 
         assertEquals("new_task_name", taskManager.getTask(id).getName());
     }
 
-    void shouldNotUpdateTaskWhenWrongIdGiven() {
-        final Task task = new Task();
-        task.setName("task_name");
-        final long id = taskManager.createTask(task);
-
-        assertEquals("task_name", taskManager.getTask(id).getName());
-
-        final Task newTask = new Task();
-        newTask.setId(-1);
-        newTask.setName("new_task_name");
-        taskManager.updateTask(newTask);
-
-        assertEquals("task_name", taskManager.getTask(id).getName());
-    }
-
-    void shouldNotCreateTaskWhenUpdatedTaskNonExistent() {
-        final Task task = new Task();
-
+    void should_removeTask_RemoveExistingTask() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
+        assertDoesNotThrow(() -> taskManager.removeTask(-1));
 
-        taskManager.updateTask(task);
-
-        assertEquals(0, taskManager.getTasks().size());
-    }
-
-    void shouldRemoveExistingTask() {
-        final Task task = new Task();
-        final long id = taskManager.createTask(task);
+        final long id = taskManager.createTask(new Task());
 
         assertEquals(1, taskManager.getTasks().size());
 
@@ -157,117 +183,71 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, taskManager.getTasks().size());
     }
 
-    void shouldNotRemoveExistingTask() {
-        final Task task = new Task();
-        final long id = taskManager.createTask(task);
-
-        assertNotNull(taskManager.getTask(id));
-
-        taskManager.removeTask(id + 1);
-        taskManager.removeTask(id - 1);
-
-        assertTrue(taskManager.getTasks().contains(task));
-    }
-
     // ================================ SUBTASK ================================
 
-    void shouldReturnCollectionWithOneSubtaskWhenSubtaskCreated() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        taskManager.createSubtask(task);
-
-        assertTrue(taskManager.getSubtasks().contains(task));
-        assertEquals(1, taskManager.getSubtasks().size());
-    }
-
-    void shouldReturnEmptyCollectionWhenNoSubtaskCreated() {
-        assertTrue(taskManager.getSubtasks().isEmpty());
-    }
-
-    void shouldClearAllSubtasksWhenSubtaskCreated() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        taskManager.createSubtask(task);
-
-        assertEquals(1, taskManager.getSubtasks().size());
-
-        taskManager.clearSubtasks();
-
-        assertTrue(taskManager.getSubtasks().isEmpty());
-    }
-
-    void shouldClearAllSubtasksWhenNoSubtaskCreated() {
-        taskManager.clearSubtasks();
-
-        assertTrue(taskManager.getSubtasks().isEmpty());
-    }
-
-    void shouldReturnExistingSubtask() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        final long id = taskManager.createSubtask(task);
-
-        assertEquals(task, taskManager.getSubtask(id));
-    }
-
-    void shouldReturnNullWhenSubtasksEmpty() {
-        assertNull(taskManager.getSubtask(-1));
-    }
-
-    void shouldCreateNewSubtask() {
+    void should_getSubtasks_ReturnSubtasks() throws ManagerTaskException {
         assertEquals(0, taskManager.getSubtasks().size());
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        taskManager.createSubtask(task);
+
+        final Subtask subtask = new Subtask(taskManager.createEpic(new Epic()));
+        taskManager.createSubtask(subtask);
+
+        assertEquals(1, taskManager.getSubtasks().size());
+        assertTrue(taskManager.getSubtasks().contains(subtask));
+    }
+
+    void should_clearSubtasks_RemoveAllSubtasks() throws ManagerTaskException {
+        taskManager.clearSubtasks();
+
+        assertTrue(taskManager.getSubtasks().isEmpty());
+
+        taskManager.createSubtask(new Subtask(taskManager.createEpic(new Epic())));
+        assertEquals(1, taskManager.getSubtasks().size());
+
+        taskManager.clearSubtasks();
+
+        assertTrue(taskManager.getSubtasks().isEmpty());
+    }
+
+    void should_getSubtask_ReturnExistingSubtask() throws ManagerTaskException {
+        assertNull(taskManager.getSubtask(-1));
+
+        final Subtask subtask = new Subtask(taskManager.createEpic(new Epic()));
+        final long id = taskManager.createSubtask(subtask);
+
+        assertEquals(subtask, taskManager.getSubtask(id));
+    }
+
+    void should_createSubtask_CreateNewSubtask() throws ManagerTaskException {
+        assertEquals(0, taskManager.getTasks().size());
+
+        taskManager.createSubtask(new Subtask(taskManager.createEpic(new Epic())));
 
         assertEquals(1, taskManager.getSubtasks().size());
     }
 
-    void shouldUpdateSubtask() {
+    void should_updateSubtask_UpdateExistingSubtask() throws ManagerTaskException {
         final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        task.setName("task_name");
-        final long id = taskManager.createSubtask(task);
+        final long id = taskManager.createSubtask(
+                (Subtask) new Subtask(epicId).setName("task_name"));
+
         assertEquals("task_name", taskManager.getSubtask(id).getName());
 
-        final Subtask newTask = new Subtask(epicId);
-        newTask.setId(id);
-        newTask.setName("new_task_name");
-        taskManager.updateSubtask(newTask);
+        final Subtask newSubtaskWrongId = (Subtask) new Subtask(epicId)
+                .setId(-1).setName("new_task_name");
+        assertThrows(ManagerTaskException.class,
+                () -> taskManager.updateTask(newSubtaskWrongId));
+        assertEquals("task_name", taskManager.getSubtask(id).getName());
+
+        taskManager.updateSubtask((Subtask) new Subtask(epicId).setId(id).setName("new_task_name"));
 
         assertEquals("new_task_name", taskManager.getSubtask(id).getName());
     }
 
-    void shouldNotUpdateSubtaskWhenWrongIdGiven() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        task.setName("task_name");
-        final long id = taskManager.createSubtask(task);
-
-        assertEquals("task_name", taskManager.getSubtask(id).getName());
-
-        final Subtask newTask = new Subtask(epicId);
-        newTask.setId(-1);
-        newTask.setName("new_task_name");
-        taskManager.updateSubtask(newTask);
-
-        assertEquals("task_name", taskManager.getSubtask(id).getName());
-    }
-
-    void shouldNotCreateSubtaskWhenUpdatedSubtaskNonExistent() {
-        final long epicId = 1;
-        final Subtask task = new Subtask(epicId);
+    void should_removeSubtask_RemoveExistingSubtask() throws ManagerTaskException {
         assertEquals(0, taskManager.getSubtasks().size());
+        assertDoesNotThrow(() -> taskManager.removeSubtask(-1));
 
-        taskManager.updateSubtask(task);
-
-        assertEquals(0, taskManager.getSubtasks().size());
-    }
-
-    void shouldRemoveExistingSubtask() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        final long id = taskManager.createSubtask(task);
+        long id = taskManager.createSubtask(new Subtask(taskManager.createEpic(new Epic())));
 
         assertEquals(1, taskManager.getSubtasks().size());
 
@@ -276,19 +256,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, taskManager.getSubtasks().size());
     }
 
-    void shouldNotRemoveExistingSubtask() {
+    void should_getEpicId_ReturnEpicId() throws ManagerTaskException {
         final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        final long id = taskManager.createSubtask(task);
-        taskManager.removeSubtask(id + 1);
-        taskManager.removeSubtask(id - 1);
-        assertNotNull(taskManager.getSubtask(id));
-    }
-
-    void shouldSubtaskReturnEpicId() {
-        final long epicId = taskManager.createEpic(new Epic());
-        final Subtask task = new Subtask(epicId);
-        final long id = taskManager.createSubtask(task);
+        final long id = taskManager.createSubtask(new Subtask(epicId));
         final Subtask createdSubtask = taskManager.getSubtask(id);
 
         assertEquals(epicId, createdSubtask.getEpicId());
@@ -296,22 +266,22 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     // ================================ EPIC ================================
 
-    void shouldReturnCollectionWithOneEpicWhenEpicCreated() {
-        final Epic task = new Epic();
-        taskManager.createEpic(task);
+    void should_getEpics_ReturnEpics() throws ManagerTaskException {
+        assertEquals(0, taskManager.getEpics().size());
 
-        assertTrue(taskManager.getEpics().contains(task));
+        final Epic epic = new Epic();
+        taskManager.createEpic(epic);
+
         assertEquals(1, taskManager.getEpics().size());
+        assertTrue(taskManager.getEpics().contains(epic));
     }
 
-    void shouldReturnEmptyCollectionWhenNoEpicCreated() {
+    void should_clearEpics_RemoveAllEpics() throws ManagerTaskException {
+        taskManager.clearEpics();
+
         assertTrue(taskManager.getEpics().isEmpty());
-    }
 
-    void shouldClearAllEpicsWhenEpicCreated() {
-        final Epic task = new Epic();
-        taskManager.createEpic(task);
-
+        taskManager.createEpic(new Epic());
         assertEquals(1, taskManager.getEpics().size());
 
         taskManager.clearEpics();
@@ -319,24 +289,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getEpics().isEmpty());
     }
 
-    void shouldClearAllEpicsWhenNoEpicCreated() {
-        taskManager.clearEpics();
-
-        assertTrue(taskManager.getEpics().isEmpty());
-    }
-
-    void shouldReturnExistingEpic() {
-        final Epic task = new Epic();
-        final long id = taskManager.createEpic(task);
-
-        assertEquals(task, taskManager.getEpic(id));
-    }
-
-    void shouldReturnNullWhenEpicsEmpty() {
+    void should_getEpic_ReturnExistingEpic() throws ManagerTaskException {
         assertNull(taskManager.getEpic(-1));
+
+        final Epic epic = new Epic();
+        final long id = taskManager.createEpic(epic);
+
+        assertEquals(epic, taskManager.getEpic(id));
     }
 
-    void shouldCreateNewEpic() {
+    void should_createEpic_CreateNewEpic() throws ManagerTaskException {
         assertEquals(0, taskManager.getEpics().size());
 
         taskManager.createEpic(new Epic());
@@ -344,49 +306,26 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, taskManager.getEpics().size());
     }
 
-    void shouldUpdateEpic() {
-        final Epic task = new Epic();
-        task.setName("task_name");
-        final long id = taskManager.createEpic(task);
+    void should_updateEpic_UpdateExistingEpic() throws ManagerTaskException {
+        final long id = taskManager.createEpic((Epic) new Epic().setName("task_name"));
 
         assertEquals("task_name", taskManager.getEpic(id).getName());
 
-        final Epic newTask = new Epic();
-        newTask.setId(id);
-        newTask.setName("new_task_name");
-        taskManager.updateEpic(newTask);
+        final Epic newEpicWrongId = (Epic) new Epic().setId(-1).setName("new_task_name");
+        assertThrows(ManagerTaskException.class,
+                () -> taskManager.updateEpic(newEpicWrongId));
+        assertEquals("task_name", taskManager.getEpic(id).getName());
+
+        taskManager.updateEpic((Epic) new Epic().setId(id).setName("new_task_name"));
 
         assertEquals("new_task_name", taskManager.getEpic(id).getName());
     }
 
-    void shouldNotUpdateEpicWhenWrongIdGiven() {
-        final Epic task = new Epic();
-        task.setName("task_name");
-        final long id = taskManager.createEpic(task);
-
-        assertEquals("task_name", taskManager.getEpic(id).getName());
-
-        final Epic newTask = new Epic();
-        newTask.setId(-1);
-        newTask.setName("new_task_name");
-        taskManager.updateEpic(newTask);
-
-        assertEquals("task_name", taskManager.getEpic(id).getName());
-    }
-
-    void shouldNotCreateEpicWhenUpdatedEpicNonExistent() {
-        final Epic task = new Epic();
-
+    void should_removeEpic_RemoveExistingEpic() throws ManagerTaskException {
         assertEquals(0, taskManager.getEpics().size());
+        assertDoesNotThrow(() -> taskManager.removeEpic(-1));
 
-        taskManager.updateEpic(task);
-
-        assertEquals(0, taskManager.getEpics().size());
-    }
-
-    void shouldRemoveExistingEpic() {
-        final Epic task = new Epic();
-        final long id = taskManager.createEpic(task);
+        final long id = taskManager.createEpic(new Epic());
 
         assertEquals(1, taskManager.getEpics().size());
 
@@ -395,108 +334,66 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, taskManager.getEpics().size());
     }
 
-    void shouldNotRemoveExistingEpic() {
-        final Epic task = new Epic();
-        final long id = taskManager.createEpic(task);
-
-        assertNotNull(taskManager.getEpic(id));
-
-        taskManager.removeEpic(id + 1);
-        taskManager.removeEpic(id - 1);
-
-        assertTrue(taskManager.getEpics().contains(task));
-    }
-
-    void shouldEpicReturnSubtask() {
+    void should_getSubtaskIds_ReturnSubtasksIds() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
-        final Subtask subtask = new Subtask(epicId);
-        final long subtaskId = taskManager.createSubtask(subtask);
+        final long subtaskId = taskManager.createSubtask(new Subtask(epicId));
 
         assertTrue(epic.getSubtaskIds().contains(subtaskId));
     }
 
-    void shouldEpicReturnStatus_NEW_WhenSubtasksEmpty() {
+    void should_getStatus_NEW_WhenSubtasksEmpty() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
     }
 
-    void shouldEpicReturnStatus_NEW_WhenSubtasks_NEW() {
+    void should_getStatus_NEW_WhenSubtasks_NEW() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
 
-        final Subtask subtask1 = new Subtask(epicId);
-        subtask1.setStatus(Status.NEW);
-        taskManager.createSubtask(subtask1);
-        final Subtask subtask2 = new Subtask(epicId);
-        subtask2.setStatus(Status.NEW);
-        taskManager.createSubtask(subtask2);
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.NEW));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.NEW));
 
         assertEquals(Status.NEW, epic.getStatus());
     }
 
-    void shouldEpicReturnStatus_DONE_WhenSubtasks_DONE() {
+    void should_getStatus_DONE_WhenSubtasks_DONE() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
 
-        final Subtask subtask1 = new Subtask(epicId);
-        subtask1.setStatus(Status.DONE);
-        taskManager.createSubtask(subtask1);
-        final Subtask subtask2 = new Subtask(epicId);
-        subtask2.setStatus(Status.DONE);
-        taskManager.createSubtask(subtask2);
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.DONE));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.DONE));
 
         assertEquals(Status.DONE, epic.getStatus());
     }
 
-    void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW() {
+    void should_getStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
 
-        final Subtask subtask1 = new Subtask(epicId);
-        subtask1.setStatus(Status.NEW);
-        taskManager.createSubtask(subtask1);
-        final Subtask subtask2 = new Subtask(epicId);
-        subtask2.setStatus(Status.DONE);
-        taskManager.createSubtask(subtask2);
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.NEW));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.DONE));
 
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
-    void shouldEpicReturnStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() {
+    void should_getStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
 
-        final Subtask subtask1 = new Subtask(epicId);
-        subtask1.setStatus(Status.IN_PROGRESS);
-        taskManager.createSubtask(subtask1);
-        final Subtask subtask2 = new Subtask(epicId);
-        subtask2.setStatus(Status.IN_PROGRESS);
-        taskManager.createSubtask(subtask2);
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.IN_PROGRESS));
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setStatus(Status.IN_PROGRESS));
 
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
-
-    void shouldReturnSubtasksFromEpic() {
-        final Epic epic = new Epic();
-        final long epicId = taskManager.createEpic(epic);
-
-        assertEquals(0, taskManager.getSubtasks(epic).size());
-
-        taskManager.createSubtask(new Subtask(epicId));
-        taskManager.createSubtask(new Subtask(epicId));
-
-        assertEquals(2, taskManager.getSubtasks(epic).size());
-    }
-
 }
