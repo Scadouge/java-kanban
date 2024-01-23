@@ -92,7 +92,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         return tasks;
     }
 
-
     private static class Node<T> {
         T data;
         Node<T> prev;

@@ -92,10 +92,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         final TaskDataUndefinedException eDurationEmpty = assertThrows(TaskDataUndefinedException.class,
                 epic1::getDuration);
-        assertEquals("Время окончания не определено: список подзадач пуст", eDurationEmpty.getMessage());
+        assertEquals("Продолжительность не определена: список подзадач пуст", eDurationEmpty.getMessage());
         final TaskDataUndefinedException eStartTimeEmpty = assertThrows(TaskDataUndefinedException.class,
                 epic1::getStartTime);
-        assertEquals("Время окончания не определено: список подзадач пуст", eStartTimeEmpty.getMessage());
+        assertEquals("Время начала не определено: список подзадач пуст", eStartTimeEmpty.getMessage());
         final TaskDataUndefinedException eEndTimeEmpty = assertThrows(TaskDataUndefinedException.class,
                 epic1::getEndTime);
         assertEquals("Время окончания не определено: список подзадач пуст", eEndTimeEmpty.getMessage());
@@ -106,7 +106,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, epic1.getDuration());
         final TaskDataUndefinedException eStartTimeOneEmptySubtask = assertThrows(TaskDataUndefinedException.class,
                 epic1::getStartTime);
-        assertEquals("Время окончания не определено: подзадачи не имеют временных интервалов", eStartTimeOneEmptySubtask.getMessage());
+        assertEquals("Время начала не определено: подзадачи не имеют временных интервалов", eStartTimeOneEmptySubtask.getMessage());
         final TaskDataUndefinedException eEndTimeOneEmptySubtask = assertThrows(TaskDataUndefinedException.class,
                 epic1::getEndTime);
         assertEquals("Время окончания не определено: подзадачи не имеют временных интервалов", eEndTimeOneEmptySubtask.getMessage());
@@ -390,7 +390,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void should_getStatus_NEW_WhenSubtasksEmpty() throws ManagerTaskException {
         final Epic epic = new Epic();
-        final long epicId = taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus());
     }

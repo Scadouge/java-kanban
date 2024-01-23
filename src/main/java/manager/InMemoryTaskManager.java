@@ -294,7 +294,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateTime(Epic epic) {
-        if(epic.getSubtaskIds().size() > 0) {
+        if (epic.getSubtaskIds().size() > 0) {
             Optional<LocalDateTime> min = epic.getSubtaskIds().stream()
                     .map(subtasks::get)
                     .map(Subtask::getStartTime)
