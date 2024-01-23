@@ -1,9 +1,6 @@
 package tasks;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class Task {
@@ -13,8 +10,8 @@ public class Task {
     private String description;
     private Status status;
 
-    private int duration;
-    private LocalDateTime startTime;
+    protected int duration;
+    protected LocalDateTime startTime;
 
     public Task() {
         type = TaskType.TASK;
@@ -22,8 +19,6 @@ public class Task {
         duration = 0;
         startTime = LocalDateTime.MAX;
     }
-
-
 
     public long getId() {
         return id;

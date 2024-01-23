@@ -18,13 +18,14 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Long, Subtask> subtasks;
     protected final HashMap<Long, Epic> epics;
     protected final HistoryManager historyManager;
+    private final static Comparator<Task> TASK_COMPARATOR = Comparator.comparing(Task::getStartTime);
     private long sequenceId;
 
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
 
     public InMemoryTaskManager() {
         intervals = new HashSet<>();
-        sortedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+        sortedTasks = new TreeSet<>(TASK_COMPARATOR);
         tasks = new HashMap<>();
         subtasks = new HashMap<>();
         epics = new HashMap<>();
@@ -50,18 +51,26 @@ public class InMemoryTaskManager implements TaskManager {
 
     private static List<String> getIntervalKeys(Task task) {
         List<String> keys = new ArrayList<>();
-        LocalDateTime startTime = task.getStartTime();
-        if(startTime.equals(LocalDateTime.MAX))
+        LocalDateTime startTime;
+        try {
+            startTime = task.getStartTime();
+        } catch (TaskDataUndefinedException e) {
             return keys;
+        }
+        if (startTime.equals(LocalDateTime.MAX)) {
+            return keys;
+        }
+
+        final int intervalInMinutes = 15;
         LocalDateTime coursor = LocalDateTime.of(startTime.toLocalDate(), LocalTime.of(startTime.getHour(),
-                (startTime.getMinute() / 15) * 15));
+                (startTime.getMinute() / intervalInMinutes) * intervalInMinutes));
 
         LocalDateTime endTime = task.getEndTime();
         LocalDateTime end = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(),
-                (endTime.getMinute() / 15) * 15));
-        while (coursor.isBefore(end.plusMinutes(15))) {
+                (endTime.getMinute() / intervalInMinutes) * intervalInMinutes));
+        while (coursor.isBefore(end.plusMinutes(intervalInMinutes))) {
             keys.add(coursor.format(formatter));
-            coursor = coursor.plusMinutes(15);
+            coursor = coursor.plusMinutes(intervalInMinutes);
         }
         return keys;
     }
@@ -285,26 +294,32 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateTime(Epic epic) {
-        Optional<LocalDateTime> min = epic.getSubtaskIds().stream()
-                .map(subtasks::get)
-                .map(Subtask::getStartTime)
-                .filter(startTime -> !startTime.equals(LocalDateTime.MAX))
-                .min(LocalDateTime::compareTo);
-        if (min.isPresent()) {
-            Optional<LocalDateTime> max = epic.getSubtaskIds().stream()
+        if(epic.getSubtaskIds().size() > 0) {
+            Optional<LocalDateTime> min = epic.getSubtaskIds().stream()
                     .map(subtasks::get)
-                    .filter(t -> !t.getStartTime().equals(LocalDateTime.MAX))
-                    .map(Task::getEndTime)
-                    .max(LocalDateTime::compareTo);
-            if (max.isPresent()) {
-                int duration = epic.getSubtaskIds().stream()
+                    .map(Subtask::getStartTime)
+                    .filter(startTime -> !startTime.equals(LocalDateTime.MAX))
+                    .min(LocalDateTime::compareTo);
+            if (min.isPresent()) {
+                Optional<LocalDateTime> max = epic.getSubtaskIds().stream()
                         .map(subtasks::get)
-                        .reduce(0, (sum, t) -> sum + t.getDuration(), Integer::sum);
-                epic.setDuration(duration);
-                epic.setStartTime(min.get());
-                epic.setEndTime(max.get());
+                        .filter(t -> !t.getStartTime().equals(LocalDateTime.MAX))
+                        .map(Task::getEndTime)
+                        .max(LocalDateTime::compareTo);
+                if (max.isPresent()) {
+                    int duration = epic.getSubtaskIds().stream()
+                            .map(subtasks::get)
+                            .reduce(0, (sum, t) -> sum + t.getDuration(), Integer::sum);
+                    epic.setDuration(duration);
+                    epic.setStartTime(min.get());
+                    epic.setEndTime(max.get());
+                    return;
+                }
             }
         }
+        epic.setDuration(0);
+        epic.setStartTime(LocalDateTime.MAX);
+        epic.setEndTime(LocalDateTime.MAX);
     }
 
     private void updateStatus(Epic epic) {

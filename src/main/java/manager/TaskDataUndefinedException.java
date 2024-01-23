@@ -2,10 +2,10 @@ package manager;
 
 import tasks.Task;
 
-public class ManagerTaskException extends RuntimeException {
+public class TaskDataUndefinedException extends RuntimeException {
     private final Task task;
 
-    public ManagerTaskException(String message, Task task) {
+    public TaskDataUndefinedException(String message, Task task) {
         super(message);
         this.task = task;
     }
@@ -14,4 +14,3 @@ public class ManagerTaskException extends RuntimeException {
         return String.format("%s [%s]", this.getMessage(), task);
     }
 }
-

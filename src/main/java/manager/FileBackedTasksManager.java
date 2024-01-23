@@ -115,9 +115,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         if (task.getType() == TaskType.SUBTASK) {
             epicId = String.valueOf(((Subtask) task).getEpicId());
         }
+        LocalDateTime startTime;
+        int duration;
+        try {
+            duration = task.getDuration();
+            startTime = task.getStartTime();
+        } catch (TaskDataUndefinedException e) {
+            duration = 0;
+            startTime = LocalDateTime.MAX;
+        }
+
         return String.join(",", String.valueOf(task.getId()), task.getType().toString(),
                 task.getName(), task.getStatus().toString(), task.getDescription(),
-                epicId, task.getStartTime().toString(), String.valueOf(task.getDuration()));
+                epicId, startTime.toString(), String.valueOf(duration));
     }
 
     @Override

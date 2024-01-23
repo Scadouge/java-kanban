@@ -13,8 +13,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
 
-    protected static TaskManager taskManager;
+    protected TaskManager taskManager;
 
+    @Test
     void should_createTask_updateTask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
         final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
         final long taskId = taskManager.createTask(new Task().setStartTime(startTime).setDuration(50));
@@ -38,6 +39,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 () -> taskManager.createTask(new Task()));
     }
 
+    @Test
     void should_createSubtask_updateSubtask_ThrowException_WhenIntervalsAlreadyClaimed() throws ManagerTaskException {
         final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
         final long epicId = taskManager.createEpic(new Epic());
@@ -62,6 +64,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 () -> taskManager.createTask(new Subtask(epicId)));
     }
 
+    @Test
     void should_getPrioritizedTasks_ReturnPrioritizedTasks() throws ManagerTaskException {
         final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
         final long epicId = taskManager.createEpic(new Epic());
@@ -84,26 +87,48 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void should_getStartTime_getEndTime_getDuration_ReturnCorrectData() throws ManagerTaskException {
         final LocalDateTime startTime1 = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
-        final long epicId = taskManager.createEpic((Epic) new Epic().setName("t0"));
-        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t1").setStartTime(startTime1).setDuration(50));
+        Epic epic1 = (Epic) new Epic().setName("t0");
+        final long epicId = taskManager.createEpic(epic1);
+
+        final TaskDataUndefinedException eDurationEmpty = assertThrows(TaskDataUndefinedException.class,
+                epic1::getDuration);
+        assertEquals("Время окончания не определено: список подзадач пуст", eDurationEmpty.getMessage());
+        final TaskDataUndefinedException eStartTimeEmpty = assertThrows(TaskDataUndefinedException.class,
+                epic1::getStartTime);
+        assertEquals("Время окончания не определено: список подзадач пуст", eStartTimeEmpty.getMessage());
+        final TaskDataUndefinedException eEndTimeEmpty = assertThrows(TaskDataUndefinedException.class,
+                epic1::getEndTime);
+        assertEquals("Время окончания не определено: список подзадач пуст", eEndTimeEmpty.getMessage());
+
         taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t2"));
+
+        assertDoesNotThrow(epic1::getDuration);
+        assertEquals(0, epic1.getDuration());
+        final TaskDataUndefinedException eStartTimeOneEmptySubtask = assertThrows(TaskDataUndefinedException.class,
+                epic1::getStartTime);
+        assertEquals("Время окончания не определено: подзадачи не имеют временных интервалов", eStartTimeOneEmptySubtask.getMessage());
+        final TaskDataUndefinedException eEndTimeOneEmptySubtask = assertThrows(TaskDataUndefinedException.class,
+                epic1::getEndTime);
+        assertEquals("Время окончания не определено: подзадачи не имеют временных интервалов", eEndTimeOneEmptySubtask.getMessage());
+
+        taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t1").setStartTime(startTime1).setDuration(50));
         taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t3").setStartTime(startTime1.plusHours(19)).setDuration(10));
         taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t4").setStartTime(startTime1.plusHours(8)).setDuration(30));
         long subtask5Id = taskManager.createSubtask((Subtask) new Subtask(epicId).setName("t5").setStartTime(startTime1.plusHours(48)).setDuration(30));
 
-        final Epic epic = taskManager.getEpic(epicId);
+        final Epic epic2 = taskManager.getEpic(epicId);
         final LocalDateTime endTime1 = startTime1.plusHours(48).plusMinutes(30); // task t5
 
-        assertEquals(startTime1, epic.getStartTime());
-        assertEquals(endTime1, epic.getEndTime());
-        assertEquals(120, epic.getDuration());
+        assertEquals(startTime1, epic2.getStartTime());
+        assertEquals(endTime1, epic2.getEndTime());
+        assertEquals(120, epic2.getDuration());
 
         taskManager.removeSubtask(subtask5Id);
 
         final LocalDateTime endTime2 = startTime1.plusHours(19).plusMinutes(10); // task t3
-        assertEquals(startTime1, epic.getStartTime());
-        assertEquals(endTime2, epic.getEndTime());
-        assertEquals(90, epic.getDuration());
+        assertEquals(startTime1, epic2.getStartTime());
+        assertEquals(endTime2, epic2.getEndTime());
+        assertEquals(90, epic2.getDuration());
 
         final LocalDateTime startTime2 = startTime1.plusHours(100);
         Task task6 = new Task().setName("t6").setStartTime(startTime2);
@@ -115,6 +140,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     // ================================ TASK ================================
 
+    @Test
     void should_getTasks_ReturnTasks() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
 
@@ -125,6 +151,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getTasks().contains(task));
     }
 
+    @Test
     void should_clearTasks_RemoveAllTasks() throws ManagerTaskException {
         taskManager.clearTasks();
 
@@ -138,6 +165,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getTasks().isEmpty());
     }
 
+    @Test
     void should_getTask_ReturnExistingTask() throws ManagerTaskException {
         assertNull(taskManager.getTask(-1));
 
@@ -147,6 +175,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(task, taskManager.getTask(id));
     }
 
+    @Test
     void should_createTask_CreateNewTask() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
 
@@ -155,6 +184,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, taskManager.getTasks().size());
     }
 
+    @Test
     void should_updateTask_UpdateExistingTask() throws ManagerTaskException {
         final long id = taskManager.createTask(new Task().setName("task_name"));
 
@@ -170,6 +200,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals("new_task_name", taskManager.getTask(id).getName());
     }
 
+    @Test
     void should_removeTask_RemoveExistingTask() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
         assertDoesNotThrow(() -> taskManager.removeTask(-1));
@@ -185,6 +216,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     // ================================ SUBTASK ================================
 
+    @Test
     void should_getSubtasks_ReturnSubtasks() throws ManagerTaskException {
         assertEquals(0, taskManager.getSubtasks().size());
 
@@ -195,6 +227,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getSubtasks().contains(subtask));
     }
 
+    @Test
     void should_clearSubtasks_RemoveAllSubtasks() throws ManagerTaskException {
         taskManager.clearSubtasks();
 
@@ -208,6 +241,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getSubtasks().isEmpty());
     }
 
+    @Test
     void should_getSubtask_ReturnExistingSubtask() throws ManagerTaskException {
         assertNull(taskManager.getSubtask(-1));
 
@@ -217,6 +251,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(subtask, taskManager.getSubtask(id));
     }
 
+    @Test
     void should_createSubtask_CreateNewSubtask() throws ManagerTaskException {
         assertEquals(0, taskManager.getTasks().size());
 
@@ -225,6 +260,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, taskManager.getSubtasks().size());
     }
 
+    @Test
     void should_updateSubtask_UpdateExistingSubtask() throws ManagerTaskException {
         final long epicId = taskManager.createEpic(new Epic());
         final long id = taskManager.createSubtask(
@@ -243,6 +279,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals("new_task_name", taskManager.getSubtask(id).getName());
     }
 
+    @Test
     void should_removeSubtask_RemoveExistingSubtask() throws ManagerTaskException {
         assertEquals(0, taskManager.getSubtasks().size());
         assertDoesNotThrow(() -> taskManager.removeSubtask(-1));
@@ -256,6 +293,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, taskManager.getSubtasks().size());
     }
 
+    @Test
     void should_getEpicId_ReturnEpicId() throws ManagerTaskException {
         final long epicId = taskManager.createEpic(new Epic());
         final long id = taskManager.createSubtask(new Subtask(epicId));
@@ -266,6 +304,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
     // ================================ EPIC ================================
 
+    @Test
     void should_getEpics_ReturnEpics() throws ManagerTaskException {
         assertEquals(0, taskManager.getEpics().size());
 
@@ -276,6 +315,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getEpics().contains(epic));
     }
 
+    @Test
     void should_clearEpics_RemoveAllEpics() throws ManagerTaskException {
         taskManager.clearEpics();
 
@@ -289,6 +329,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getEpics().isEmpty());
     }
 
+    @Test
     void should_getEpic_ReturnExistingEpic() throws ManagerTaskException {
         assertNull(taskManager.getEpic(-1));
 
@@ -298,6 +339,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(epic, taskManager.getEpic(id));
     }
 
+    @Test
     void should_createEpic_CreateNewEpic() throws ManagerTaskException {
         assertEquals(0, taskManager.getEpics().size());
 
@@ -306,6 +348,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, taskManager.getEpics().size());
     }
 
+    @Test
     void should_updateEpic_UpdateExistingEpic() throws ManagerTaskException {
         final long id = taskManager.createEpic((Epic) new Epic().setName("task_name"));
 
@@ -321,6 +364,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals("new_task_name", taskManager.getEpic(id).getName());
     }
 
+    @Test
     void should_removeEpic_RemoveExistingEpic() throws ManagerTaskException {
         assertEquals(0, taskManager.getEpics().size());
         assertDoesNotThrow(() -> taskManager.removeEpic(-1));
@@ -334,6 +378,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(0, taskManager.getEpics().size());
     }
 
+    @Test
     void should_getSubtaskIds_ReturnSubtasksIds() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
@@ -342,6 +387,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(epic.getSubtaskIds().contains(subtaskId));
     }
 
+    @Test
     void should_getStatus_NEW_WhenSubtasksEmpty() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
@@ -349,6 +395,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.NEW, epic.getStatus());
     }
 
+    @Test
     void should_getStatus_NEW_WhenSubtasks_NEW() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
@@ -361,6 +408,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.NEW, epic.getStatus());
     }
 
+    @Test
     void should_getStatus_DONE_WhenSubtasks_DONE() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
@@ -373,6 +421,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.DONE, epic.getStatus());
     }
 
+    @Test
     void should_getStatus_IN_PROGRESS_WhenSubtasks_DONE_And_NEW() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);
@@ -385,6 +434,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
     }
 
+    @Test
     void should_getStatus_IN_PROGRESS_WhenSubtasks_IN_PROGRESS() throws ManagerTaskException {
         final Epic epic = new Epic();
         final long epicId = taskManager.createEpic(epic);

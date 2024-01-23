@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryHistoryManagerTest {
 
-    private static HistoryManager historyManager;
+    private HistoryManager historyManager;
 
     @BeforeEach
     void createHistoryManager() {
