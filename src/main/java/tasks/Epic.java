@@ -41,7 +41,7 @@ public class Epic extends Task {
 
     @Override
     public int getDuration() throws TaskDataUndefinedException {
-        if (getSubtaskIds().size() == 0) {
+        if (getSubtaskIds().isEmpty()) {
             throw new TaskDataUndefinedException("Продолжительность не определена: список подзадач пуст", this);
         } else {
             return super.getDuration();
@@ -50,7 +50,7 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getEndTime() throws TaskDataUndefinedException {
-        if (getSubtaskIds().size() == 0) {
+        if (getSubtaskIds().isEmpty()) {
             throw new TaskDataUndefinedException("Время окончания не определено: список подзадач пуст", this);
         } else if (endTime == LocalDateTime.MAX) {
             throw new TaskDataUndefinedException("Время окончания не определено: подзадачи не имеют временных интервалов", this);
@@ -61,7 +61,7 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getStartTime() throws TaskDataUndefinedException {
-        if (getSubtaskIds().size() == 0) {
+        if (getSubtaskIds().isEmpty()) {
             throw new TaskDataUndefinedException("Время начала не определено: список подзадач пуст", this);
         } else if (startTime == LocalDateTime.MAX) {
             throw new TaskDataUndefinedException("Время начала не определено: подзадачи не имеют временных интервалов", this);
