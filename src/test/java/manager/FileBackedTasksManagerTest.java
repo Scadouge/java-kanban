@@ -104,7 +104,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
 
-        assertEquals(0, taskManager.getHistory().size());
+        assertEquals(0, manager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
         assertEquals(0, manager.getSubtasks().size());
@@ -130,7 +130,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
 
-        assertEquals(0, taskManager.getHistory().size());
+        assertEquals(0, manager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(1, manager.getEpics().size());
         assertEquals(0, manager.getSubtasks().size());
@@ -158,7 +158,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
 
-        assertEquals(0, taskManager.getHistory().size());
+        assertEquals(0, manager.getHistory().size());
         assertEquals(2, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
         assertEquals(0, manager.getSubtasks().size());
