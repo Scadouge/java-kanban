@@ -143,7 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task removedTask = tasks.remove(id);
         if (removedTask != null) {
             unclaimIntervals(removedTask);
-            sortedTasks.add(removedTask);
+            sortedTasks.remove(removedTask);
             historyManager.remove(id);
         }
     }
