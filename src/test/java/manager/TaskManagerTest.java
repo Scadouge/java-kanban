@@ -31,7 +31,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.removeTask(taskId);
 
         assertDoesNotThrow(
-                () -> taskManager.createTask(new Task().setId(taskId).setStartTime(startTime).setDuration(55)));
+                () -> taskManager.createTask(new Task().setStartTime(startTime).setDuration(55)));
 
         assertDoesNotThrow(
                 () -> taskManager.createTask(new Task()));
@@ -56,7 +56,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.removeSubtask(subtaskId);
 
         assertDoesNotThrow(
-                () -> taskManager.createSubtask((Subtask) new Subtask(epicId).setId(subtaskId).setStartTime(startTime).setDuration(55)));
+                () -> taskManager.createSubtask((Subtask) new Subtask(epicId).setStartTime(startTime).setDuration(55)));
 
         assertDoesNotThrow(
                 () -> taskManager.createTask(new Subtask(epicId)));
