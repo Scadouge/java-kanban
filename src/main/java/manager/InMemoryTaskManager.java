@@ -132,6 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
                 throw new ManagerTaskException("Задача не может быть создана: пересекаются интервалы", task);
             }
             tasks.put(task.getId(), task);
+            sortedTasks.remove(existingTask);
             sortedTasks.add(task);
         } else {
             throw new ManagerTaskException("Обновляемая задача не найдена", task);
@@ -209,6 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             Epic epic = epics.get(existingSubtask.getEpicId());
             subtasks.put(subtask.getId(), subtask);
+            sortedTasks.remove(existingSubtask);
             sortedTasks.add(subtask);
             updateStatus(epic);
             updateTime(epic);
