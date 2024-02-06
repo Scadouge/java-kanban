@@ -60,8 +60,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(7, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), task1Id + ",TASK,TASK NAME,NEW,null,," + LocalDateTime.MAX + ",0");
-        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(1), task1Id + ",TASK,TASK NAME,NEW,null,,,");
+        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,,,");
         assertEquals(lines.get(3), subtaskId + ",SUBTASK,null,IN_PROGRESS,null," + epicId + "," + startTime + ",50");
         assertEquals(lines.get(4), epicId + ",EPIC,null,IN_PROGRESS,null,," + startTime + ",50");
         assertTrue(lines.get(5).isEmpty());
@@ -125,7 +125,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(3, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), epicId + ",EPIC,null,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(1), epicId + ",EPIC,null,NEW,null,,,");
         assertTrue(lines.get(2).isEmpty());
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);
@@ -138,8 +138,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
     @Test
     void should_saveAndLoad_TasksWithoutHistory() throws IOException, ManagerTaskException {
-        final long task1Id = taskManager.createTask(new Task());
-        final long task2Id = taskManager.createTask(new Task());
+        final long task1Id = taskManager.createTask(new Task().setStartTime(LocalDateTime.MIN));
+        final long task2Id = taskManager.createTask(new Task().setDuration(4));
 
         List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(TEST_SAVE_FILE.toFile()))) {
@@ -152,8 +152,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(4, lines.size());
         assertEquals(lines.get(0), FILE_HEADER);
-        assertEquals(lines.get(1), task1Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
-        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,," + LocalDateTime.MAX + ",0");
+        assertEquals(lines.get(1), task1Id + ",TASK,null,NEW,null,," + LocalDateTime.MIN + ",");
+        assertEquals(lines.get(2), task2Id + ",TASK,null,NEW,null,,,4");
         assertTrue(lines.get(3).isEmpty());
 
         FileBackedTasksManager manager = FileBackedTasksManager.loadFromFile(TEST_SAVE_FILE);

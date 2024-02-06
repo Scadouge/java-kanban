@@ -12,6 +12,8 @@ public class Task {
 
     protected int duration;
     protected LocalDateTime startTime;
+    public static final LocalDateTime DEFAULT_START_TIME = LocalDateTime.MAX;
+    public static final int DEFAULT_DURATION = 0;
 
     public Task() {
         type = TaskType.TASK;

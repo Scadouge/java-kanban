@@ -86,8 +86,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         task.setName(split[2]);
         task.setStatus(Status.valueOf(split[3]));
         task.setDescription(split[4]);
-        task.setStartTime(LocalDateTime.parse(split[6]));
-        task.setDuration(Integer.parseInt(split[7]));
+        if (split.length <= 6 || split[6].isEmpty()) {
+            task.setStartTime(Task.DEFAULT_START_TIME);
+        } else {
+            task.setStartTime(LocalDateTime.parse(split[6]));
+        }
+        if (split.length <= 7 || split[7].isEmpty()) {
+            task.setDuration(0);
+        } else {
+            task.setDuration(Integer.parseInt(split[7]));
+        }
     }
 
     private void save() {
@@ -112,22 +120,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private String taskToString(Task task) {
         //id,type,name,status,description,epic,time,duration
         String epicId = "";
+        String startTime;
+        String duration;
         if (task.getType() == TaskType.SUBTASK) {
             epicId = String.valueOf(((Subtask) task).getEpicId());
         }
-        LocalDateTime startTime;
-        int duration;
         try {
-            duration = task.getDuration();
-            startTime = task.getStartTime();
+            if (task.getDuration() == Task.DEFAULT_DURATION) {
+                duration = "";
+            } else {
+                duration = String.valueOf(task.getDuration());
+            }
+            if (task.getStartTime().equals(Task.DEFAULT_START_TIME)) {
+                startTime = "";
+            } else {
+                startTime = task.getStartTime().toString();
+            }
         } catch (TaskDataUndefinedException e) {
-            duration = 0;
-            startTime = LocalDateTime.MAX;
+            duration = "";
+            startTime = "";
         }
 
         return String.join(",", String.valueOf(task.getId()), task.getType().toString(),
                 task.getName(), task.getStatus().toString(), task.getDescription(),
-                epicId, startTime.toString(), String.valueOf(duration));
+                epicId, startTime, duration);
     }
 
     @Override
