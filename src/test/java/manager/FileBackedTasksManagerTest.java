@@ -1,11 +1,12 @@
 package manager;
 
+import exception.ManagerTaskException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.Status;
-import tasks.Subtask;
-import tasks.Task;
+import task.Epic;
+import task.Status;
+import task.Subtask;
+import task.Task;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +26,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     private final static String FILE_HEADER = "id,type,name,status,description,epic,time,duration";
 
     @BeforeEach
-    public void createTaskManager() throws IOException {
+    public void setUp() throws IOException {
         if (Files.exists(TEST_SAVE_FILE)) {
             Files.delete(TEST_SAVE_FILE);
         }
@@ -33,7 +34,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
     }
 
     @Test
-    void should_saveAndLoad_TwoTasksAndHistory() throws IOException, ManagerTaskException {
+    void should_saveAndLoad_TasksAndHistory() throws IOException, ManagerTaskException {
         final LocalDateTime startTime = LocalDateTime.of(2024, 1, 20, 19, 13, 0);
         final Task task = new Task();
         task.setName("TASK NAME");
@@ -77,12 +78,12 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(4, manager.getHistory().size());
         assertEquals(2, manager.getTasks().size());
         assertEquals(1, manager.getEpics().size());
-        assertEquals(1, manager.getSubtasks().size());
+        assertEquals(1, manager.getEpicSubtasks().size());
         assertEquals("TASK NAME", manager.getTask(task1Id).getName());
         assertEquals(epicId, manager.getSubtask(subtaskId).getEpicId());
         assertTrue(manager.getEpic(epicId).getSubtaskIds().contains(subtaskId));
-        assertEquals(50, manager.getSubtasks().iterator().next().getDuration());
-        assertEquals(startTime, manager.getSubtasks().iterator().next().getStartTime());
+        assertEquals(50, manager.getEpicSubtasks().iterator().next().getDuration());
+        assertEquals(startTime, manager.getEpicSubtasks().iterator().next().getStartTime());
     }
 
     @Test
@@ -107,7 +108,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(0, manager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
-        assertEquals(0, manager.getSubtasks().size());
+        assertEquals(0, manager.getEpicSubtasks().size());
     }
 
     @Test
@@ -133,7 +134,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(0, manager.getHistory().size());
         assertEquals(0, manager.getTasks().size());
         assertEquals(1, manager.getEpics().size());
-        assertEquals(0, manager.getSubtasks().size());
+        assertEquals(0, manager.getEpicSubtasks().size());
     }
 
     @Test
@@ -161,6 +162,6 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
         assertEquals(0, manager.getHistory().size());
         assertEquals(2, manager.getTasks().size());
         assertEquals(0, manager.getEpics().size());
-        assertEquals(0, manager.getSubtasks().size());
+        assertEquals(0, manager.getEpicSubtasks().size());
     }
 }

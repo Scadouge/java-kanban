@@ -1,9 +1,10 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Status;
-import tasks.Subtask;
-import tasks.Task;
+import exception.*;
+import task.Epic;
+import task.Status;
+import task.Subtask;
+import task.Task;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -18,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Long, Subtask> subtasks;
     protected final HashMap<Long, Epic> epics;
     protected final HistoryManager historyManager;
-    private final static Comparator<Task> TASK_COMPARATOR = Comparator.comparing(Task::getStartTime);
+    private final static Comparator<Task> TASK_COMPARATOR = Comparator.comparing(Task::getStartTime).thenComparing(Task::getId);
     private long sequenceId;
 
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
@@ -57,7 +58,7 @@ public class InMemoryTaskManager implements TaskManager {
         } catch (TaskDataUndefinedException e) {
             return keys;
         }
-        if (startTime.equals(LocalDateTime.MAX)) {
+        if (startTime.equals(Task.DEFAULT_START_TIME)) {
             return keys;
         }
 
@@ -99,7 +100,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTask(long id) {
+    public Task getTask(Long id) {
+        if (id == null) {
+            return null;
+        }
         Task task = tasks.get(id);
         if (task != null) {
             historyManager.add(task);
@@ -108,39 +112,47 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public long createTask(Task task) throws ManagerTaskException {
-        if (task != null) {
-            if (!claimIntervals(task)) {
-                throw new ManagerTaskException("Задача не может быть создана: пересекаются интервалы", task);
-            }
-            task.setId(generateId());
-            tasks.put(task.getId(), task);
-            sortedTasks.add(task);
-            return task.getId();
-        } else {
-            throw new ManagerTaskException("Задача не может быть создана", task);
+    public Long createTask(Task task) throws ManagerTaskException {
+        if (task == null) {
+            throw new ManagerTaskBadInputException("Задача не может быть создана: task = null");
         }
+        if (tasks.get(task.getId()) != null) {
+            throw new ManagerTaskAlreadyExistException("Задача не может быть создана: задача с таким id уже существует " + task.getId());
+        }
+        if (!claimIntervals(task)) {
+            throw new ManagerTaskTimeIntersectionException("Задача не может быть создана: пересекаются интервалы");
+        }
+        task.setId(generateId());
+        tasks.put(task.getId(), task);
+        sortedTasks.add(task);
+        return task.getId();
+
     }
 
     @Override
     public void updateTask(Task task) throws ManagerTaskException {
-        if (tasks.containsKey(task.getId())) {
-            Task existingTask = tasks.get(task.getId());
-            unclaimIntervals(existingTask);
-            if (!claimIntervals(task)) {
-                claimIntervals(existingTask);
-                throw new ManagerTaskException("Задача не может быть создана: пересекаются интервалы", task);
-            }
-            tasks.put(task.getId(), task);
-            sortedTasks.remove(existingTask);
-            sortedTasks.add(task);
-        } else {
-            throw new ManagerTaskException("Обновляемая задача не найдена", task);
+        if (task == null) {
+            throw new ManagerTaskBadInputException("Задача не может быть обновлена: task = null");
         }
+        if (!tasks.containsKey(task.getId())) {
+            throw new ManagerTaskNotFoundException("Обновляемая задача не найдена: id = " + task.getId());
+        }
+        Task existingTask = tasks.get(task.getId());
+        unclaimIntervals(existingTask);
+        if (!claimIntervals(task)) {
+            claimIntervals(existingTask);
+            throw new ManagerTaskTimeIntersectionException("Задача не может быть обновлена: пересекаются интервалы");
+        }
+        tasks.put(task.getId(), task);
+        sortedTasks.remove(existingTask);
+        sortedTasks.add(task);
     }
 
     @Override
-    public void removeTask(long id) {
+    public void removeTask(Long id) {
+        if (id == null) {
+            return;
+        }
         Task removedTask = tasks.remove(id);
         if (removedTask != null) {
             unclaimIntervals(removedTask);
@@ -151,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     // Subtask
     @Override
-    public List<Subtask> getSubtasks() {
+    public List<Subtask> getEpicSubtasks() {
         return new ArrayList<>(subtasks.values());
     }
 
@@ -168,7 +180,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask getSubtask(long id) {
+    public Subtask getSubtask(Long id) {
+        if (id == null) {
+            return null;
+        }
         Subtask subtask = subtasks.get(id);
         if (subtask != null) {
             historyManager.add(subtask);
@@ -177,50 +192,56 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public long createSubtask(Subtask subtask) throws ManagerTaskException {
-        if (subtask != null) {
-            if (epics.containsKey(subtask.getEpicId())) {
-                if (!claimIntervals(subtask)) {
-                    throw new ManagerTaskException("Подзадача не может быть создана: пересекаются интервалы", subtask);
-                }
-                subtask.setId(generateId());
-                Epic epic = epics.get(subtask.getEpicId());
-                epic.addSubtaskId(subtask.getId());
-                subtasks.put(subtask.getId(), subtask);
-                sortedTasks.add(subtask);
-                updateStatus(epic);
-                updateTime(epic);
-            } else {
-                throw new ManagerTaskException("Подзадача не может быть создана: не найден епик", subtask);
-            }
-            return subtask.getId();
-        } else {
-            throw new ManagerTaskException("Подзадача не может быть создана", subtask);
+    public Long createSubtask(Subtask subtask) throws ManagerTaskException {
+        if (subtask == null) {
+            throw new ManagerTaskBadInputException("Подзадача не может быть создана: subtask = null");
         }
+        if (subtasks.get(subtask.getId()) != null) {
+            throw new ManagerTaskAlreadyExistException("Подзадача не может быть создана: задача с таким id уже существует " + subtask.getId());
+        }
+        if (!epics.containsKey(subtask.getEpicId())) {
+            throw new ManagerTaskException("Подзадача не может быть создана: не найден епик");
+        }
+        if (!claimIntervals(subtask)) {
+            throw new ManagerTaskTimeIntersectionException("Подзадача не может быть создана: пересекаются интервалы");
+        }
+        subtask.setId(generateId());
+        Epic epic = epics.get(subtask.getEpicId());
+        epic.addSubtaskId(subtask.getId());
+        subtasks.put(subtask.getId(), subtask);
+        sortedTasks.add(subtask);
+        updateStatus(epic);
+        updateTime(epic);
+        return subtask.getId();
     }
 
     @Override
     public void updateSubtask(Subtask subtask) throws ManagerTaskException {
-        if (subtasks.containsKey(subtask.getId())) {
-            Subtask existingSubtask = subtasks.get(subtask.getId());
-            unclaimIntervals(existingSubtask);
-            if (!claimIntervals(subtask)) {
-                claimIntervals(existingSubtask);
-                throw new ManagerTaskException("Подзадача не может быть создана: пересекаются интервалы", subtask);
-            }
-            Epic epic = epics.get(existingSubtask.getEpicId());
-            subtasks.put(subtask.getId(), subtask);
-            sortedTasks.remove(existingSubtask);
-            sortedTasks.add(subtask);
-            updateStatus(epic);
-            updateTime(epic);
-        } else {
-            throw new ManagerTaskException("Обновляемая подзадача не найдена", subtask);
+        if (subtask == null) {
+            throw new ManagerTaskBadInputException("Подзадача не может быть обновлена: subtask = null");
         }
+        if (!subtasks.containsKey(subtask.getId())) {
+            throw new ManagerTaskNotFoundException("Обновляемая подзадача не найдена");
+        }
+        Subtask existingSubtask = subtasks.get(subtask.getId());
+        unclaimIntervals(existingSubtask);
+        if (!claimIntervals(subtask)) {
+            claimIntervals(existingSubtask);
+            throw new ManagerTaskException("Подзадача не может быть обновлена: пересекаются интервалы");
+        }
+        Epic epic = epics.get(existingSubtask.getEpicId());
+        subtasks.put(subtask.getId(), subtask);
+        sortedTasks.remove(existingSubtask);
+        sortedTasks.add(subtask);
+        updateStatus(epic);
+        updateTime(epic);
     }
 
     @Override
-    public void removeSubtask(long id) {
+    public void removeSubtask(Long id) {
+        if (id == null) {
+            return;
+        }
         Subtask subtask = subtasks.get(id);
         if (subtask != null) {
             unclaimIntervals(subtask);
@@ -251,7 +272,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic getEpic(long id) {
+    public Epic getEpic(Long id) {
+        if (id == null) {
+            return null;
+        }
         Epic epic = epics.get(id);
         if (epic != null) {
             historyManager.add(epic);
@@ -260,27 +284,34 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public long createEpic(Epic epic) throws ManagerTaskException {
-        if (epic != null) {
-            epic.setId(generateId());
-            epics.put(epic.getId(), epic);
-            return epic.getId();
-        } else {
-            throw new ManagerTaskException("Эпик не может быть создан", epic);
+    public Long createEpic(Epic epic) throws ManagerTaskException {
+        if (epic == null) {
+            throw new ManagerTaskBadInputException("Эпик не может быть создан: epic = null");
         }
+        if (epics.get(epic.getId()) != null) {
+            throw new ManagerTaskAlreadyExistException("Эпик не может быть создан: задача с таким id уже существует " + epic.getId());
+        }
+        epic.setId(generateId());
+        epics.put(epic.getId(), epic);
+        return epic.getId();
     }
 
     @Override
     public void updateEpic(Epic epic) throws ManagerTaskException {
-        if (epics.containsKey(epic.getId())) {
-            epics.put(epic.getId(), epic);
-        } else {
-            throw new ManagerTaskException("Обновляемый эпик не найден", epic);
+        if (epic == null) {
+            throw new ManagerTaskBadInputException("Эпик не может быть обновлен: epic = null");
         }
+        if (!epics.containsKey(epic.getId())) {
+            throw new ManagerTaskException("Обновляемый эпик не найден");
+        }
+        epics.put(epic.getId(), epic);
     }
 
     @Override
-    public void removeEpic(long id) {
+    public void removeEpic(Long id) {
+        if (id == null) {
+            return;
+        }
         Epic epic = epics.get(id);
         if (epic != null) {
             epic.getSubtaskIds().forEach(subtasks::remove);
@@ -291,7 +322,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Subtask> getSubtasks(Epic epic) {
+    public List<Subtask> getEpicSubtasks(Long epicId) {
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            throw new ManagerTaskNotFoundException("Невозможно получить список подзадач: не найден эпик");
+        }
         return epic.getSubtaskIds().stream().map(subtasks::get).collect(Collectors.toList());
     }
 
@@ -300,12 +335,12 @@ public class InMemoryTaskManager implements TaskManager {
             Optional<LocalDateTime> min = epic.getSubtaskIds().stream()
                     .map(subtasks::get)
                     .map(Subtask::getStartTime)
-                    .filter(startTime -> !startTime.equals(LocalDateTime.MAX))
+                    .filter(startTime -> !startTime.equals(Task.DEFAULT_START_TIME))
                     .min(LocalDateTime::compareTo);
             if (min.isPresent()) {
                 Optional<LocalDateTime> max = epic.getSubtaskIds().stream()
                         .map(subtasks::get)
-                        .filter(t -> !t.getStartTime().equals(LocalDateTime.MAX))
+                        .filter(t -> !t.getStartTime().equals(Task.DEFAULT_START_TIME))
                         .map(Task::getEndTime)
                         .max(LocalDateTime::compareTo);
                 if (max.isPresent()) {
@@ -326,7 +361,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void updateStatus(Epic epic) {
         Status newStatus = null;
-        for (Subtask subtask : getSubtasks(epic)) {
+        for (Long subtaskId : epic.getSubtaskIds()) {
+            Subtask subtask = subtasks.get(subtaskId);
             if (newStatus != null) {
                 if (subtask.getStatus() != newStatus) {
                     newStatus = Status.IN_PROGRESS;

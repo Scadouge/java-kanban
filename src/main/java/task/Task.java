@@ -1,28 +1,28 @@
-package tasks;
+package task;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
-    private long id;
+    public static final LocalDateTime DEFAULT_START_TIME = LocalDateTime.MAX;
+    public static final int DEFAULT_DURATION = 0;
+
+    private Long id;
     protected TaskType type;
     private String name;
     private String description;
     private Status status;
-
     protected int duration;
     protected LocalDateTime startTime;
-    public static final LocalDateTime DEFAULT_START_TIME = LocalDateTime.MAX;
-    public static final int DEFAULT_DURATION = 0;
 
     public Task() {
         type = TaskType.TASK;
         status = Status.NEW;
-        duration = 0;
-        startTime = LocalDateTime.MAX;
+        duration = DEFAULT_DURATION;
+        startTime = DEFAULT_START_TIME;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -99,7 +99,7 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id;
+        return Objects.equals(id, task.id);
     }
 
     @Override

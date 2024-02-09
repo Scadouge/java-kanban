@@ -1,8 +1,9 @@
 package manager;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
+import exception.ManagerTaskException;
+import task.Epic;
+import task.Subtask;
+import task.Task;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,39 +19,39 @@ public interface TaskManager {
 
     void clearTasks();
 
-    Task getTask(long id);
+    Task getTask(Long id);
 
-    long createTask(Task task) throws ManagerTaskException;
+    Long createTask(Task task) throws ManagerTaskException;
 
     void updateTask(Task task) throws ManagerTaskException;
 
-    void removeTask(long id);
+    void removeTask(Long id);
 
     // Subtask
-    List<Subtask> getSubtasks();
+    List<Subtask> getEpicSubtasks();
 
     void clearSubtasks();
 
-    Subtask getSubtask(long id);
+    Subtask getSubtask(Long id);
 
-    long createSubtask(Subtask subtask) throws ManagerTaskException;
+    Long createSubtask(Subtask subtask) throws ManagerTaskException;
 
     void updateSubtask(Subtask subtask) throws ManagerTaskException;
 
-    void removeSubtask(long id);
+    void removeSubtask(Long id);
 
     // Epic
     List<Epic> getEpics();
 
     void clearEpics();
 
-    Epic getEpic(long id);
+    Epic getEpic(Long id);
 
-    long createEpic(Epic epic) throws ManagerTaskException;
+    Long createEpic(Epic epic) throws ManagerTaskException;
 
     void updateEpic(Epic epic) throws ManagerTaskException;
 
-    void removeEpic(long id);
+    void removeEpic(Long id);
 
-    List<Subtask> getSubtasks(Epic epic);
+    List<Subtask> getEpicSubtasks(Long epicId);
 }

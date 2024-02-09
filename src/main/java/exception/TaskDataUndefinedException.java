@@ -1,6 +1,6 @@
-package manager;
+package exception;
 
-import tasks.Task;
+import task.Task;
 
 public class TaskDataUndefinedException extends RuntimeException {
     private final Task task;

@@ -1,6 +1,9 @@
 package manager;
 
-import tasks.*;
+import exception.ManagerSaveException;
+import exception.ManagerTaskException;
+import exception.TaskDataUndefinedException;
+import task.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -42,7 +45,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     manager.createTaskFromString(line);
                 }
             }
-            for (Subtask subtask : manager.getSubtasks()) {
+            for (Subtask subtask : manager.getEpicSubtasks()) {
                 long epicId = subtask.getEpicId();
                 Epic epic = manager.epics.get(epicId);
                 epic.addSubtaskId(subtask.getId());
@@ -98,13 +101,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() {
+    protected void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file)) {
             writer.write(TABLE_HEADER);
             for (Task task : getTasks()) {
                 writer.write(taskToString(task) + System.lineSeparator());
             }
-            for (Task task : getSubtasks()) {
+            for (Task task : getEpicSubtasks()) {
                 writer.write(taskToString(task) + System.lineSeparator());
             }
             for (Task task : getEpics()) {
@@ -153,15 +156,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task getTask(long id) {
+    public Task getTask(Long id) {
         Task task = super.getTask(id);
         save();
         return task;
     }
 
     @Override
-    public long createTask(Task task) throws ManagerTaskException {
-        long id = super.createTask(task);
+    public Long createTask(Task task) throws ManagerTaskException {
+        Long id = super.createTask(task);
         save();
         return id;
     }
@@ -173,7 +176,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void removeTask(long id) {
+    public void removeTask(Long id) {
         super.removeTask(id);
         save();
     }
@@ -185,15 +188,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Subtask getSubtask(long id) {
+    public Subtask getSubtask(Long id) {
         Subtask subtask = super.getSubtask(id);
         save();
         return subtask;
     }
 
     @Override
-    public long createSubtask(Subtask subtask) throws ManagerTaskException {
-        long id = super.createSubtask(subtask);
+    public Long createSubtask(Subtask subtask) throws ManagerTaskException {
+        Long id = super.createSubtask(subtask);
         save();
         return id;
     }
@@ -205,7 +208,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void removeSubtask(long id) {
+    public void removeSubtask(Long id) {
         super.removeSubtask(id);
         save();
     }
@@ -217,15 +220,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Epic getEpic(long id) {
+    public Epic getEpic(Long id) {
         Epic epic = super.getEpic(id);
         save();
         return epic;
     }
 
     @Override
-    public long createEpic(Epic epic) throws ManagerTaskException {
-        long id = super.createEpic(epic);
+    public Long createEpic(Epic epic) throws ManagerTaskException {
+        Long id = super.createEpic(epic);
         save();
         return id;
     }
@@ -237,12 +240,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void removeEpic(long id) {
+    public void removeEpic(Long id) {
         super.removeEpic(id);
         save();
     }
 
-    private Task getTaskUniversal(long id) {
+    protected Task getTaskUniversal(Long id) {
         Task task = null;
         if (tasks.containsKey(id)) {
             task = tasks.get(id);

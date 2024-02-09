@@ -2,9 +2,9 @@ package manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
+import task.Epic;
+import task.Subtask;
+import task.Task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,7 +14,7 @@ class InMemoryHistoryManagerTest {
     private HistoryManager historyManager;
 
     @BeforeEach
-    void createHistoryManager() {
+    void setUp() {
         historyManager = new InMemoryHistoryManager();
     }
 
@@ -33,8 +33,8 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task);
 
         assertEquals(2, historyManager.getHistory().size());
-        assertEquals(epic.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(task.getId(), historyManager.getHistory().get(1).longValue());
+        assertEquals(epic.getId(), historyManager.getHistory().get(0));
+        assertEquals(task.getId(), historyManager.getHistory().get(1));
     }
 
     @Test
@@ -51,8 +51,8 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task);
 
         assertEquals(2, historyManager.getHistory().size());
-        assertEquals(epic.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(task.getId(), historyManager.getHistory().get(1).longValue());
+        assertEquals(epic.getId(), historyManager.getHistory().get(0));
+        assertEquals(task.getId(), historyManager.getHistory().get(1));
     }
 
     @Test
@@ -68,15 +68,15 @@ class InMemoryHistoryManagerTest {
         historyManager.add(subtask);
 
         assertEquals(3, historyManager.getHistory().size());
-        assertEquals(task.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(epic.getId(), historyManager.getHistory().get(1).longValue());
-        assertEquals(subtask.getId(), historyManager.getHistory().get(2).longValue());
+        assertEquals(task.getId(), historyManager.getHistory().get(0));
+        assertEquals(epic.getId(), historyManager.getHistory().get(1));
+        assertEquals(subtask.getId(), historyManager.getHistory().get(2));
 
         historyManager.remove(task.getId());
 
         assertEquals(2, historyManager.getHistory().size());
-        assertEquals(epic.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(subtask.getId(), historyManager.getHistory().get(1).longValue());
+        assertEquals(epic.getId(), historyManager.getHistory().get(0));
+        assertEquals(subtask.getId(), historyManager.getHistory().get(1));
     }
 
     @Test
@@ -92,15 +92,15 @@ class InMemoryHistoryManagerTest {
         historyManager.add(subtask);
 
         assertEquals(3, historyManager.getHistory().size());
-        assertEquals(task.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(epic.getId(), historyManager.getHistory().get(1).longValue());
-        assertEquals(subtask.getId(), historyManager.getHistory().get(2).longValue());
+        assertEquals(task.getId(), historyManager.getHistory().get(0));
+        assertEquals(epic.getId(), historyManager.getHistory().get(1));
+        assertEquals(subtask.getId(), historyManager.getHistory().get(2));
 
         historyManager.remove(epic.getId());
 
         assertEquals(2, historyManager.getHistory().size());
-        assertEquals(task.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(subtask.getId(), historyManager.getHistory().get(1).longValue());
+        assertEquals(task.getId(), historyManager.getHistory().get(0));
+        assertEquals(subtask.getId(), historyManager.getHistory().get(1));
     }
 
     @Test
@@ -116,14 +116,14 @@ class InMemoryHistoryManagerTest {
         historyManager.add(subtask);
 
         assertEquals(3, historyManager.getHistory().size());
-        assertEquals(task.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(epic.getId(), historyManager.getHistory().get(1).longValue());
-        assertEquals(subtask.getId(), historyManager.getHistory().get(2).longValue());
+        assertEquals(task.getId(), historyManager.getHistory().get(0));
+        assertEquals(epic.getId(), historyManager.getHistory().get(1));
+        assertEquals(subtask.getId(), historyManager.getHistory().get(2));
 
         historyManager.remove(subtask.getId());
 
         assertEquals(2, historyManager.getHistory().size());
-        assertEquals(task.getId(), historyManager.getHistory().get(0).longValue());
-        assertEquals(epic.getId(), historyManager.getHistory().get(1).longValue());
+        assertEquals(task.getId(), historyManager.getHistory().get(0));
+        assertEquals(epic.getId(), historyManager.getHistory().get(1));
     }
 }

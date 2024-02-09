@@ -1,7 +1,12 @@
-package tasks;
+package task;
+
+import java.time.LocalDateTime;
 
 public class Subtask extends Task {
-    private final long epicId;
+    private long epicId;
+
+    private Subtask() {
+    }
 
     public Subtask(long epicId) {
         super();
