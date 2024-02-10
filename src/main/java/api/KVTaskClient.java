@@ -1,5 +1,7 @@
 package api;
 
+import exception.KVTaskClientException;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -11,7 +13,7 @@ public class KVTaskClient {
 
     private final URI uri;
     private String token;
-    HttpClient httpClient;
+    private final HttpClient httpClient;
 
     public KVTaskClient(URI uri) {
         httpClient = HttpClient.newHttpClient();
@@ -25,13 +27,14 @@ public class KVTaskClient {
             HttpResponse<String> response = httpClient.send(request, bodyHandlers);
             if (response.statusCode() == 200) {
                 return response.body();
+            } else if (response.statusCode() == 404) {
+                return null;
             } else {
-                System.out.println("Сервер вернул код состояния: " + response.statusCode());
+                throw new KVTaskClientException("Во время выполнения запроса возникла ошибка: сервер вернул код состояния отличное: " + response.statusCode());
             }
-        } catch (IOException | InterruptedException ignored) {
-            System.out.println("s");
+        } catch (IOException | InterruptedException e) {
+            throw new KVTaskClientException("Во время выполнения запроса возникла ошибка: " + e.getMessage());
         }
-        return null;
     }
 
     private void register() {

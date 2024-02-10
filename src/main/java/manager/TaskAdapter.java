@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 
 public class TaskAdapter implements JsonSerializer<Task> {
-    Gson gson = new Gson();
+    private final Gson gson = new Gson();
+
     @Override
     public JsonElement serialize(Task task, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonElement taskJson = gson.toJsonTree(task);
