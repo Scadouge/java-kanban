@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class HttpTaskServer {
+    private final static String CONTENT_TYPE = "Content-Type";
+    private final static String APPLICATION_JSON = "application/json";
     private final static String PATH = "/tasks";
     private final int PORT = 8080;
     private final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
@@ -52,7 +54,7 @@ public class HttpTaskServer {
             String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
             Headers responseHeaders = exchange.getResponseHeaders();
             String responseString = "";
-            int responseCode;
+            StatusCode responseCode;
 
             Map<String, String> params = new HashMap<>();
             if (exchange.getRequestURI().getQuery() != null) {
@@ -67,167 +69,166 @@ public class HttpTaskServer {
             switch (endpoint) {
                 case GET_TASKS:
                     responseString = gson.toJson(taskManager.getTasks());
-                    responseHeaders.add("Content-Type", "application/json");
-                    responseCode = 200;
+                    responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                    responseCode = StatusCode.OK;
                     break;
                 case GET_TASK:
                     try {
                         responseString = gson.toJson(taskManager.getTask(Long.parseLong(params.get("id"))));
                         if (responseString.equals("null")) {
-                            responseCode = 404;
+                            responseCode = StatusCode.NOT_FOUND;
                         } else {
-                            responseHeaders.add("Content-Type", "application/json");
-                            responseCode = 200;
+                            responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                            responseCode = StatusCode.OK;
                         }
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case POST_TASK:
                     task = gson.fromJson(requestBody, Task.class);
                     try {
                         responseString = String.valueOf(taskManager.createTask(task));
-                        responseHeaders.add("Content-Type", "application/json");
-                        responseCode = 201;
+                        responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                        responseCode = StatusCode.OK_CREATED;
                     } catch (ManagerTaskBadInputException | ManagerTaskTimeIntersectionException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     } catch (ManagerTaskAlreadyExistException e) {
                         taskManager.updateTask(task);
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     }
                     break;
                 case DELETE_TASK:
                     try {
                         taskManager.removeTask(Long.parseLong(params.get("id")));
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case DELETE_TASKS:
                     taskManager.clearTasks();
-                    responseCode = 204;
+                    responseCode = StatusCode.OK_NO_CONTENT;
                     break;
                 case GET_SUBTASKS:
                     responseString = gson.toJson(taskManager.getEpicSubtasks());
-                    responseHeaders.add("Content-Type", "application/json");
-                    responseCode = 200;
+                    responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                    responseCode = StatusCode.OK;
                     break;
                 case GET_SUBTASK:
                     try {
                         responseString = gson.toJson(taskManager.getSubtask(Long.parseLong(params.get("id"))));
                         if (responseString.equals("null")) {
-                            responseCode = 404;
+                            responseCode = StatusCode.NOT_FOUND;
                         } else {
-                            responseHeaders.add("Content-Type", "application/json");
-                            responseCode = 200;
+                            responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                            responseCode = StatusCode.OK;
                         }
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case POST_SUBTASK:
                     task = gson.fromJson(requestBody, Subtask.class);
                     try {
                         responseString = String.valueOf(taskManager.createSubtask((Subtask) task));
-                        responseHeaders.add("Content-Type", "application/json");
-                        responseCode = 201;
+                        responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                        responseCode = StatusCode.OK_CREATED;
                     } catch (ManagerTaskBadInputException | ManagerTaskTimeIntersectionException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     } catch (ManagerTaskAlreadyExistException e) {
                         taskManager.updateSubtask((Subtask) task);
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     }
                     break;
                 case DELETE_SUBTASK:
                     try {
                         taskManager.removeSubtask(Long.parseLong(params.get("id")));
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case DELETE_SUBTASKS:
                     taskManager.clearSubtasks();
-                    responseCode = 204;
+                    responseCode = StatusCode.OK_NO_CONTENT;
                     break;
                 case GET_EPICS:
                     responseString = gson.toJson(taskManager.getEpics());
-                    responseHeaders.add("Content-Type", "application/json");
-                    responseCode = 200;
+                    responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                    responseCode = StatusCode.OK;
                     break;
                 case GET_EPIC:
                     try {
                         responseString = gson.toJson(taskManager.getEpic(Long.parseLong(params.get("id"))));
                         if (responseString.equals("null")) {
-                            responseCode = 404;
+                            responseCode = StatusCode.NOT_FOUND;
                         } else {
-                            responseHeaders.add("Content-Type", "application/json");
-                            responseCode = 200;
+                            responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                            responseCode = StatusCode.OK;
                         }
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case POST_EPIC:
                     task = gson.fromJson(requestBody, Epic.class);
                     try {
                         responseString = String.valueOf(taskManager.createEpic((Epic) task));
-                        responseHeaders.add("Content-Type", "application/json");
-                        responseCode = 201;
+                        responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                        responseCode = StatusCode.OK_CREATED;
                     } catch (ManagerTaskBadInputException | ManagerTaskTimeIntersectionException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     } catch (ManagerTaskAlreadyExistException e) {
                         taskManager.updateEpic((Epic) task);
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     }
                     break;
                 case DELETE_EPIC:
                     try {
                         taskManager.removeEpic(Long.parseLong(params.get("id")));
-                        responseCode = 204;
+                        responseCode = StatusCode.OK_NO_CONTENT;
                     } catch (NumberFormatException e) {
-                        responseCode = 400;
+                        responseCode = StatusCode.BAD_REQUEST;
                     }
                     break;
                 case DELETE_EPICS:
                     taskManager.clearEpics();
-                    responseCode = 204;
+                    responseCode = StatusCode.OK_NO_CONTENT;
                     break;
                 case GET_EPIC_SUBTASKS:
                     try {
                         List<Subtask> ids = taskManager.getEpicSubtasks(Long.parseLong(params.get("id")));
                         responseString = gson.toJson(ids);
-                        responseHeaders.add("Content-Type", "application/json");
-                        responseCode = 200;
+                        responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                        responseCode = StatusCode.OK;
                     } catch (ManagerTaskNotFoundException e) {
-                        responseCode = 404;
+                        responseCode = StatusCode.NOT_FOUND;
                     }
                     break;
                 case GET_HISTORY:
                     responseString = gson.toJson(taskManager.getHistory());
-                    responseHeaders.add("Content-Type", "application/json");
-                    responseCode = 200;
+                    responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                    responseCode = StatusCode.OK;
                     break;
                 case GET_PRIORITIZED_TASKS:
                     responseString = gson.toJson(taskManager.getPrioritizedTasks());
-                    responseHeaders.add("Content-Type", "application/json");
-                    responseCode = 200;
+                    responseHeaders.add(CONTENT_TYPE, APPLICATION_JSON);
+                    responseCode = StatusCode.OK;
                     break;
                 default:
                     responseString = "";
-                    responseCode = 404;
+                    responseCode = StatusCode.NOT_FOUND;
             }
             writeResponse(exchange, responseString, responseCode);
         }
 
-        private void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
+        private void writeResponse(HttpExchange exchange, String responseString, StatusCode responseCode) throws IOException {
             if (responseString.isEmpty()) {
-                exchange.sendResponseHeaders(responseCode, 0);
-
+                exchange.sendResponseHeaders(responseCode.getStatusCode(), 0);
             } else {
                 byte[] bytes = responseString.getBytes(DEFAULT_CHARSET);
-                exchange.sendResponseHeaders(responseCode, bytes.length);
+                exchange.sendResponseHeaders(responseCode.getStatusCode(), bytes.length);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(bytes);
                 }
@@ -242,6 +243,24 @@ public class HttpTaskServer {
 
     public void stop() {
         httpServer.stop(1);
+    }
+
+    private enum StatusCode {
+        OK(200),
+        OK_CREATED(201),
+        OK_NO_CONTENT(204),
+        BAD_REQUEST(400),
+        NOT_FOUND(404);
+
+        private final int statusCode;
+        
+        StatusCode(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
     }
 
     public enum Endpoint {
@@ -279,11 +298,11 @@ public class HttpTaskServer {
                     .filter(endpoint -> endpoint.getMethod() == RequestMethod.valueOf(requestMethod))
                     .filter(endpoint -> endpoint.getPath().equals(requestPath))
                     .filter(endpoint -> {
-                        if (requestParams == null && endpoint.getParams().size() == 0) {
+                        if (requestParams == null && endpoint.getParams().isEmpty()) {
                             return true;
                         } else if (requestParams == null) {
                             return false;
-                        } else if (endpoint.getParams().size() == 0) {
+                        } else if (endpoint.getParams().isEmpty()) {
                             return false;
                         } else {
                             String[] splitRequestParams = requestParams.split("&");
@@ -293,7 +312,7 @@ public class HttpTaskServer {
                             return mismatchParam.isEmpty();
                         }
                     }).collect(Collectors.toList());
-            if (endpoints.size() == 0) {
+            if (endpoints.isEmpty()) {
                 return UNKNOWN;
             } else if (endpoints.size() == 1) {
                 return endpoints.get(0);
