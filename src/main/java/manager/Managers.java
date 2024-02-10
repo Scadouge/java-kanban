@@ -19,7 +19,7 @@ public class Managers {
     }
 
     public static TaskManager getFileBackedTasksManager() {
-        Path defaultSavePath = Path.of("src/main/resources/save.CSV");;
+        Path defaultSavePath = Path.of("src/main/resources/save.CSV");
         return new FileBackedTasksManager(defaultSavePath);
     }
 
